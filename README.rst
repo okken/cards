@@ -9,8 +9,8 @@ cards
 .. image:: https://img.shields.io/travis/okken/cards.svg
         :target: https://travis-ci.org/okken/cards
 
-.. image:: https://readthedocs.org/projects/cards-projec/badge/?version=latest
-        :target: https://cards-projec.readthedocs.io/en/latest/?badge=latest
+.. image:: https://readthedocs.org/projects/cards-project/badge/?version=latest
+        :target: https://cards-project.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
 
@@ -24,7 +24,7 @@ Project task tracking / todo list
 
 
 * Free software: MIT license
-* Documentation: https://cards.readthedocs.io.
+* Documentation: https://cards-project.readthedocs.io.
 
 
 Features
