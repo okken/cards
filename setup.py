@@ -1,54 +1,115 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""The setup script."""
+# Note: To use the 'upload' functionality of this file, you must:
+#   $ pip install twine
 
-from setuptools import setup, find_packages
+import io
+import os
+import sys
+from shutil import rmtree
 
-with open('README.rst') as readme_file:
-    readme = readme_file.read()
+from setuptools import find_packages, setup, Command
 
-with open('HISTORY.rst') as history_file:
-    history = history_file.read()
+# Package meta-data.
+NAME = 'cards'
+DESCRIPTION = 'Project task tracking / todo list.'
+URL = 'https://github.com/okken/cards'
+EMAIL = 'brian@pythontesting.net'
+AUTHOR = 'Brian Okken'
+REQUIRES_PYTHON = '>=3.6.0'
+VERSION = '0.1.1'
 
-requirements = ['Click>=6.0', ]
+# What packages are required for this module to be executed?
+REQUIRED = [
+    'Click>=6.0', 'tinydb', 'attrs'
+]
 
-setup_requirements = ['pytest-runner', ]
+# The rest you shouldn't have to touch too much :)
+# ------------------------------------------------
+# Except, perhaps the License and Trove Classifiers!
+# If you do change the License, remember to change the Trove Classifier for that!
 
-test_requirements = ['pytest', ]
+here = os.path.abspath(os.path.dirname(__file__))
+
+# Import the README and use it as the long-description.
+# Note: this will only work if 'README.rst' is present in your MANIFEST.in file!
+with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
+    long_description = '\n' + f.read()
+
+# Load the package's __version__.py module as a dictionary.
+about = {}
+if not VERSION:
+    with open(os.path.join(here, NAME, '__version__.py')) as f:
+        exec(f.read(), about)
+else:
+    about['__version__'] = VERSION
+
+
+class UploadCommand(Command):
+    """Support setup.py upload."""
+
+    description = 'Build and publish the package.'
+    user_options = []
+
+    @staticmethod
+    def status(s):
+        """Prints things in bold."""
+        print('\033[1m{0}\033[0m'.format(s))
+
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
+
+    def run(self):
+        try:
+            self.status('Removing previous builds…')
+            rmtree(os.path.join(here, 'dist'))
+        except OSError:
+            pass
+
+        self.status('Building Source and Wheel (universal) distribution…')
+        os.system(
+            '{0} setup.py sdist bdist_wheel --universal'.format(sys.executable))
+
+        self.status('Uploading the package to PyPi via Twine…')
+        os.system('twine upload dist/*')
+
+        self.status('Pushing git tags…')
+        os.system('git tag v{0}'.format(about['__version__']))
+        os.system('git push --tags')
+
+        sys.exit()
+
 
 setup(
-    author="Brian Okken",
-    author_email='brian@pythontesting.net',
-    classifiers=[
-        'Development Status :: 2 - Pre-Alpha',
-        'Intended Audience :: Developers',
-        'License :: OSI Approved :: MIT License',
-        'Natural Language :: English',
-        "Programming Language :: Python :: 2",
-        'Programming Language :: Python :: 2.7',
-        'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.4',
-        'Programming Language :: Python :: 3.5',
-        'Programming Language :: Python :: 3.6',
-    ],
-    description="Project task tracking / todo list",
+    name=NAME,
+    version=about['__version__'],
+    description=DESCRIPTION,
+    long_description=long_description,
+    author=AUTHOR,
+    author_email=EMAIL,
+    python_requires=REQUIRES_PYTHON,
+    url=URL,
+    packages=find_packages(exclude=('tests',)),
     entry_points={
-        'console_scripts': [
-            'cards=cards.cli:main',
-        ],
+        'console_scripts': ['cards=cards.cli:cards_cli'],
     },
-    install_requires=requirements,
-    license="MIT license",
-    long_description=readme + '\n\n' + history,
+    install_requires=REQUIRED,
     include_package_data=True,
-    keywords='cards',
-    name='cards',
-    packages=find_packages(include=['cards']),
-    setup_requires=setup_requirements,
-    test_suite='tests',
-    tests_require=test_requirements,
-    url='https://github.com/okken/cards',
-    version='0.1.0',
-    zip_safe=False,
+    license='MIT',
+    classifiers=[
+        'License :: OSI Approved :: MIT License',
+        'Programming Language :: Python',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: Implementation :: CPython',
+        'Programming Language :: Python :: Implementation :: PyPy'
+    ],
+    # $ setup.py publish support.
+    cmdclass={
+        'upload': UploadCommand,
+    },
 )

@@ -1,38 +1,18 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `cards` package."""
+from cards import Card
 
-import pytest
+def test_add(db_empty):
+    # GIVEN an empty database
+    db = db_empty
 
-from click.testing import CliRunner
+    # WHEN a new card is added
+    new_card = Card('do something')
+    new_id = db.add(new_card)
 
-from cards import cards
-from cards import cli
+    # THEN The card count is increased to 1
+    assert 1 == db.count()
+    # AND It's retrievable by the id
+    assert new_card == db.get(new_id)
 
-
-@pytest.fixture
-def response():
-    """Sample pytest fixture.
-
-    See more at: http://doc.pytest.org/en/latest/fixture.html
-    """
-    # import requests
-    # return requests.get('https://github.com/audreyr/cookiecutter-pypackage')
-
-
-def test_content(response):
-    """Sample pytest test function with the pytest fixture as an argument."""
-    # from bs4 import BeautifulSoup
-    # assert 'GitHub' in BeautifulSoup(response.content).title.string
-
-
-def test_command_line_interface():
-    """Test the CLI."""
-    runner = CliRunner()
-    result = runner.invoke(cli.main)
-    assert result.exit_code == 0
-    assert 'cards.cli.main' in result.output
-    help_result = runner.invoke(cli.main, ['--help'])
-    assert help_result.exit_code == 0
-    assert '--help  Show this message and exit.' in help_result.output
