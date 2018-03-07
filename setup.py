@@ -18,7 +18,7 @@ URL = 'https://github.com/okken/cards'
 EMAIL = 'brian@pythontesting.net'
 AUTHOR = 'Brian Okken'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.1'
+VERSION = '0.1.2'
 
 # What packages are required for this module to be executed?
 REQUIRED = [

@@ -67,7 +67,7 @@ def count():
 
 def cards_db():
     # just put it in users home dir for now
-    db_path = str(pathlib.Path().home() / '.cards_db.json')
+    db_path = pathlib.Path().home() / '.cards_db.json'
     return CardsDB(db_path)
 
 

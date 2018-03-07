@@ -11,8 +11,8 @@ def test_add(db_empty):
     new_card = Card('do something')
     new_id = db.add(new_card)
 
-    # THEN The card count is increased to 1
-    assert 1 == db.count()
-    # AND It's retrievable by the id
-    assert new_card == db.get(new_id)
+    # THEN The listing returns just the new card
+    all_cards = db.list_cards()
+    assert 1 == len(all_cards)
+    assert new_card == all_cards[0]
 
