@@ -4,7 +4,7 @@ This is a demo application being built in conjunction with the [Test & Code podc
 
 We'll be building up this application, and testing it, and adding functionality, while discussing software testing and development practices.
 
-Follow along, starting with [episode 37](http://testandcode.com).
+Follow along, starting with [episode 37](http://testandcode.com/37).
 
 There will be more documentation here at some point. :)
 
