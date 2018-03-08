@@ -22,6 +22,15 @@ cards
 
 Project task tracking / todo list
 
+This is a demo application being built in conjunction with
+the `Test & Code podcast <http://testandcode.com>`__.
+
+We'll be building up this application, and testing it, and adding
+functionality, while discussing software testing and development
+practices.
+
+Follow along, starting with `episode 37 <http://testandcode.com>`__.
+
 
 * Free software: MIT license
 * Documentation: https://cards-project.readthedocs.io.
@@ -31,5 +40,6 @@ Features
 --------
 
 * TODO
+
 
 
