@@ -19,7 +19,7 @@ build: off
 
 test_script:
   # to put the Python version you want to use on PATH.
-  - "%PYTHON%\\python.exe -m tox"
+  - "%PYTHON%\\python.exe -m tox -e py36"
 
 after_test:
   # This step builds your wheels.
