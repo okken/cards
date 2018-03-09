@@ -1,0 +1,33 @@
+environment:
+
+  matrix:
+
+    # For Python versions available on Appveyor, see
+    # http://www.appveyor.com/docs/installed-software#python
+    # The list here is complete (excluding Python 2.6, which
+    # isn't covered by this document) at the time of writing.
+
+    - PYTHON: "C:\\Python36"
+    - PYTHON: "C:\\Python36-x64"
+    - PYTHON: "C:\\Miniconda36"
+    - PYTHON: "C:\\Miniconda36-x64"
+
+install:
+  #- "%PYTHON%\\python.exe -m pip install wheel pytest flake8 tox"
+  - "%PYTHON%\\python.exe -m pip install wheel pytest"
+
+build: off
+
+test_script:
+  # to put the Python version you want to use on PATH.
+  #- "build.cmd tox"
+  - "pytest"
+
+after_test:
+  # This step builds your wheels.
+  - "%PYTHON%\\python.exe setup.py bdist_wheel"
+
+artifacts:
+  # bdist_wheel puts your built wheel in the dist directory
+  - path: dist\*
+
