@@ -2,7 +2,7 @@
 
 """Top-level package for cards."""
 
-__version__ = '0.1.2'
+__version__ = '0.1.3'
 
 from .cardsdb import (  # noqa: F401
     Card,
