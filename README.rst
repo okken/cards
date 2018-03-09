@@ -9,10 +9,12 @@ cards
 .. image:: https://img.shields.io/travis/okken/cards.svg
         :target: https://travis-ci.org/okken/cards
 
+.. image:: https://ci.appveyor.com/api/projects/status/hk18x9ovqv3d7kpw?svg=true
+    :target: https://ci.appveyor.com/project/okken/cards
+
 .. image:: https://readthedocs.org/projects/cards-project/badge/?version=latest
         :target: https://cards-project.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
-
 
 .. image:: https://pyup.io/repos/github/okken/cards/shield.svg
      :target: https://pyup.io/repos/github/okken/cards/
