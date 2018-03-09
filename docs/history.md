@@ -1,14 +1,25 @@
 History
 =======
 
+0.1.3 (2018-03-06)
+------------------
+
+-   Running cards with no command now runs list instead of help.
+
+0.1.2 (2018-03-06)
+------------------
+
+-   Add CLI tests
+
+0.1.1 (2018-03-06)
+------------------
+
+-   Add rudimentary functionality
+
 0.1.0 (2018-03-05)
 ------------------
 
 -   First release on PyPI. This is just from the cookie cutter template.
 -   There is no functionality available yet.
 
-0.1.1 (2018-03-06)
-------------------
-
--   Add rudimentary functionality
 
