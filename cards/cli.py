@@ -1,7 +1,7 @@
 """Command Line Interface (CLI) for cards project."""
 
 import click
-from .cardsdb import Card, CardsDB
+import cards
 import pathlib
 
 
@@ -18,7 +18,7 @@ def cards_cli():
               help='set the card owner')
 def add(summary, owner):
     """Add a card to db."""
-    cards_db().add(Card(summary, owner))
+    cards_db().add(cards.Card(summary, owner))
 
 
 @cards_cli.command(help="delete a card")
@@ -56,7 +56,7 @@ def list_cards():
               help='change the card done state (True or False)')
 def update(card_id, owner, summary, done):
     """Modify a card in db with given id with new info."""
-    cards_db().update(card_id, Card(summary, owner, done))
+    cards_db().update(card_id, cards.Card(summary, owner, done))
 
 
 @cards_cli.command(help="list count")
@@ -68,7 +68,7 @@ def count():
 def cards_db():
     # just put it in users home dir for now
     db_path = pathlib.Path().home() / '.cards_db.json'
-    return CardsDB(db_path)
+    return cards.CardsDB(db_path)
 
 
 if __name__ == '__main__':
