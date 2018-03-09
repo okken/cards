@@ -7,7 +7,7 @@ import pathlib
 
 @click.group(invoke_without_command=True,
              context_settings={'help_option_names': ['-h', '--help']})
-@click.version_option(version='0.1.1')
+@click.version_option(version=cards.__version__)
 @click.pass_context
 def cards_cli(ctx):
     """Run the cards application."""
