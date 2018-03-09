@@ -5,11 +5,14 @@ import cards
 import pathlib
 
 
-@click.group(context_settings={'help_option_names': ['-h', '--help']})
+@click.group(invoke_without_command=True,
+             context_settings={'help_option_names': ['-h', '--help']})
 @click.version_option(version='0.1.1')
-def cards_cli():
+@click.pass_context
+def cards_cli(ctx):
     """Run the cards application."""
-    pass
+    if ctx.invoked_subcommand is None:
+        ctx.invoke(list_cards)
 
 
 @cards_cli.command(help="add a card")
