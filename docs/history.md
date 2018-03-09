@@ -1,12 +1,12 @@
 History
 =======
 
-0.1.3 (2018-03-06)
+0.1.3 (2018-03-09)
 ------------------
 
 -   Running cards with no command now runs list instead of help.
 
-0.1.2 (2018-03-06)
+0.1.2 (2018-03-07)
 ------------------
 
 -   Add CLI tests
