@@ -8,20 +8,18 @@ environment:
     # isn't covered by this document) at the time of writing.
 
     - PYTHON: "C:\\Python36"
-    - PYTHON: "C:\\Python36-x64"
-    - PYTHON: "C:\\Miniconda36"
-    - PYTHON: "C:\\Miniconda36-x64"
+    #- PYTHON: "C:\\Python36-x64"
+    #- PYTHON: "C:\\Miniconda36"
+    #- PYTHON: "C:\\Miniconda36-x64"
 
 install:
-  #- "%PYTHON%\\python.exe -m pip install wheel pytest flake8 tox"
-  - "%PYTHON%\\python.exe -m pip install wheel pytest"
+  - "%PYTHON%\\python.exe -m pip install --upgrade wheel pytest flake8 tox"
 
 build: off
 
 test_script:
   # to put the Python version you want to use on PATH.
-  #- "build.cmd tox"
-  - "pytest"
+  - "%PYTHON%\\python.exe -m tox"
 
 after_test:
   # This step builds your wheels.
