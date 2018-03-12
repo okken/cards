@@ -2,7 +2,6 @@ import pytest
 from cards import CardsDB
 
 
-
 @pytest.fixture(scope='session')
 def db_session(tmpdir_factory):
     db_path = tmpdir_factory.mktemp('data').join('.cards_db.json')
