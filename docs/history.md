@@ -1,6 +1,12 @@
 History
 =======
 
+0.1.4 (2018-03-09)
+------------------
+
+-   Cleaning up extra files, cleaning up Makefile, and setup.py.
+-   Had to bump version to test "make release"
+
 0.1.3 (2018-03-09)
 ------------------
 
