@@ -1,6 +1,10 @@
 History
 =======
 
+dev
+------------------
+- (internal) change version version handling in `setup.py` to read it from `cards/__init__.py`
+
 0.1.4 (2018-03-09)
 ------------------
 
