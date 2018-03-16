@@ -4,6 +4,8 @@ History
 dev
 ------------------
 - (internal) change version version handling in `setup.py` to read it from `cards/__init__.py`
+- (internal) take out versions from requirements_dev.txt
+- (internal) refacter tests directory into cli and cardsdb directories
 
 0.1.4 (2018-03-09)
 ------------------
