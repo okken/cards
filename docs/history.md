@@ -1,7 +1,7 @@
 History
 =======
 
-0.1.5 (2018-03-09)
+0.1.5 (2018-03-16)
 ------------------
 - (internal) change version version handling in `setup.py` to read it from `cards/__init__.py`
 - (internal) take out versions from requirements_dev.txt
