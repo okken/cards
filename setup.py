@@ -1,13 +1,9 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# Note: To use the 'upload' functionality of this file, you must:
-#   $ pip install twine
-
 import io
 import os
-import sys
-from shutil import rmtree
+import re
 
 from setuptools import find_packages, setup, Command
 
@@ -20,10 +16,7 @@ AUTHOR = 'Brian Okken'
 REQUIRES_PYTHON = '>=3.6.0'
 VERSION = '0.1.4'
 
-# What packages are required for this module to be executed?
-REQUIRED = [
-    'Click>=6.0', 'tinydb', 'attrs'
-]
+REQUIRED = [ 'Click==6.7', 'tinydb==3.8.0', 'attrs==17.4.0' ]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -33,22 +26,25 @@ REQUIRED = [
 here = os.path.abspath(os.path.dirname(__file__))
 
 # Import the README and use it as the long-description.
-# Note: this will only work if 'README.rst' is present in your MANIFEST.in file!
 with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
-# Load the package's __version__.py module as a dictionary.
-about = {}
-if not VERSION:
-    with open(os.path.join(here, NAME, '__version__.py')) as f:
-        exec(f.read(), about)
-else:
-    about['__version__'] = VERSION
+def read(*parts):
+    with io.open(os.path.join(here, *parts), 'r') as fp:
+        return fp.read()
+
+def find_version(*file_paths):
+    version_file = read(*file_paths)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
+                              version_file, re.M)
+    if version_match:
+        return version_match.group(1)
+    raise RuntimeError("Unable to find version string.")
 
 
 setup(
     name=NAME,
-    version=about['__version__'],
+    version=find_version('cards', '__init__.py'),
     description=DESCRIPTION,
     long_description=long_description,
     author=AUTHOR,
