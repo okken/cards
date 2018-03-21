@@ -1,6 +1,15 @@
 History
 =======
 
+0.1.6 (2018-03-20)
+------------------
+- automate the 1 manual test in both cli and api versions
+- mark tracer bullet tests with pytest.mark.smoke
+- mark cli tests with pytest.mark.cli
+- mark alac tests with pytest.mark.alac
+- add coverage to tox runs
+- add smoketest and alactest targets to Makefile
+
 0.1.5 (2018-03-16)
 ------------------
 - (internal) change version version handling in `setup.py` to read it from `cards/__init__.py`
