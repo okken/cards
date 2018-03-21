@@ -3,7 +3,8 @@ History
 
 0.1.8 (2018-03-21)
 ------------------
-- add coveralls.io
+- remove coveralls.io (version 0.1.9)
+- add coveralls.io (version 0.1.8)
 
 0.1.7 (2018-03-20)
 ------------------

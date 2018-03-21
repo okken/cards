@@ -16,9 +16,6 @@ cards
         :target: https://cards-project.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
-.. image:: https://coveralls.io/repos/github/okken/cards/badge.svg?branch=master
-:target: https://coveralls.io/github/okken/cards?branch=master
-
 
 Project task tracking / todo list
 
