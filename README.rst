@@ -16,6 +16,8 @@ cards
         :target: https://cards-project.readthedocs.io/en/latest/?badge=latest
         :alt: Documentation Status
 
+.. image:: https://codecov.io/gh/okken/cards/branch/master/graph/badge.svg
+  :target: https://codecov.io/gh/okken/cards
 
 Project task tracking / todo list
 
