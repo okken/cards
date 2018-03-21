@@ -4,7 +4,11 @@ Tests using cards CLI (command line interface).
 This file contains tests related to design changes.
 """
 
+import pytest
 import cards.cli
+
+
+pytestmark = pytest.mark.cli
 
 
 def test_list_on_no_command(db_non_empty, runner):

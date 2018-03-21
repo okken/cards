@@ -4,3 +4,4 @@ tox
 coverage
 mkdocs
 pytest
+pytest-cov

@@ -1,12 +1,23 @@
 # Manual Tests for cards
 
-*Probably haven't seen many open source projects with manual test procedures, have you?*
+*Probably haven't seen many open source code with manual tests, have you?*
 
-*This makes more sense in the context of the podcast. See [Test & Code, episode 37](http://testandcode.com/37)*
+*This makes more sense in the context of the podcast.*
+
+*See [Test & Code, episode 37](http://testandcode.com/37)*
 
 So far, just one test.
 
 1. ALAC Test 1
+
+    ----
+    **This test has been replaced with**
+    - **`test_alac_1()` in `test_alac.py`**
+    - **`test_alac_1()` in `test_cli_alac.py`**
+
+    *leaving in place temporarily to allow people to see and compare the*
+    *automated test to the original.*
+    ----
 
     Examples shown don't have to be followed exactly.
 

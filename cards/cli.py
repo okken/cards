@@ -72,7 +72,3 @@ def cards_db():
     # just put it in users home dir for now
     db_path = pathlib.Path().home() / '.cards_db.json'
     return cards.CardsDB(db_path)
-
-
-if __name__ == '__main__':
-    cards_cli()

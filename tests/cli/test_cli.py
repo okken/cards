@@ -5,9 +5,14 @@ This file contains tracer bullet tests.
 Not in depth tests of functionality.
 """
 
+import pytest
 import cards.cli
 
 
+pytestmark = pytest.mark.cli
+
+
+@pytest.mark.smoke
 def test_add(db_empty, runner):
     # GIVEN an empty database
     # WHEN a new card is added
@@ -21,6 +26,7 @@ def test_add(db_empty, runner):
     assert expected_output == result.output
 
 
+@pytest.mark.smoke
 def test_list(db_empty, runner):
     # GIVEN a db with known contents of 2 cards
     runner.invoke(cards.cli.cards_cli, ['add', 'one'])
@@ -35,6 +41,7 @@ def test_list(db_empty, runner):
     assert expected == result.output
 
 
+@pytest.mark.smoke
 def test_count(db_empty, runner):
     # GIVEN a db with 2 cards
     runner.invoke(cards.cli.cards_cli, ['add', 'one'])
@@ -47,6 +54,7 @@ def test_count(db_empty, runner):
 
 
 # this test was annoying to write. parsing list output is yucky
+@pytest.mark.smoke
 def test_update(db_non_empty, runner):
     # GIVEN a card known to be in the db
     result = runner.invoke(cards.cli.cards_cli, ['list'])
@@ -73,6 +81,7 @@ def test_update(db_non_empty, runner):
     assert orig_summary == summary
 
 
+@pytest.mark.smoke
 def test_delete(db_empty, runner):
     # GIVEN a db with 2 items
     runner.invoke(cards.cli.cards_cli, ['add', 'one'])
