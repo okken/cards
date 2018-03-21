@@ -3,4 +3,4 @@ flake8
 tox
 coverage
 mkdocs
-pytest
+pytest==3.4.2
