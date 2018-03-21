@@ -4,4 +4,4 @@ tox
 coverage
 mkdocs
 pytest
-pytest-cov
+pytest-cov==2.5.1
