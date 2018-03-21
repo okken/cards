@@ -42,6 +42,43 @@ def test_list(db_empty, runner):
 
 
 @pytest.mark.smoke
+def test_list_filter_owner(db_empty, runner):
+    # GIVEN a db with known contents
+    runner.invoke(cards.cli.cards_cli, ['add', '-o', 'okken', 'one'])
+    runner.invoke(cards.cli.cards_cli, ['add', '-o', 'anyone', 'two'])
+    runner.invoke(cards.cli.cards_cli, ['add', 'three'])
+
+    # `cards list -o okken` returns only 1 card
+    result = runner.invoke(cards.cli.cards_cli, ['list', '-o', 'okken'])
+    expected = ("  ID      owner  done summary\n"
+                "  --      -----  ---- -------\n"
+                "   1      okken       one\n")
+    assert expected == result.output
+
+    # `cards list -o anyone` returns only 1 card
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--owner', 'anyone'])
+    expected = ("  ID      owner  done summary\n"
+                "  --      -----  ---- -------\n"
+                "   2     anyone       two\n")
+    assert expected == result.output
+
+    # `cards list --noowner` returns only 1 card
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--noowner'])
+    expected = ("  ID      owner  done summary\n"
+                "  --      -----  ---- -------\n"
+                "   3                  three\n")
+    assert expected == result.output
+
+    # `cards list --nooner -o okken` returns 2 cards
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--noowner', '-o', 'okken'])
+    expected = ("  ID      owner  done summary\n"
+                "  --      -----  ---- -------\n"
+                "   1      okken       one\n"
+                "   3                  three\n")
+    assert expected == result.output
+
+
+@pytest.mark.smoke
 def test_count(db_empty, runner):
     # GIVEN a db with 2 cards
     runner.invoke(cards.cli.cards_cli, ['add', 'one'])
