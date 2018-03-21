@@ -1,6 +1,10 @@
 History
 =======
 
+0.1.7 (2018-03-20)
+------------------
+- unpeg dependencies
+
 0.1.6 (2018-03-20)
 ------------------
 - automate the 1 manual test in both cli and api versions
