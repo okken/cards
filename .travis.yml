@@ -1,19 +1,14 @@
 language: python
 python:
 - 3.6
-# Command to install dependencies, e.g. pip install -r requirements.txt --use-mirrors
 install: pip install -U tox-travis
 script: tox
-# Assuming you have installed the travis-ci CLI tool, after you
-# create the Github repo and add it to Travis, run the
-# following command to finish PyPI deployment setup:
-# $ travis encrypt --add deploy.password
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel
   user: okken
   password:
-    secure: PLEASE_REPLACE_ME
+    secure: ovv9SeKjE1M4ukqoy5udrYCJFCRF0ic5WQLOwIdDQpc8s41Yrv1qonWsfI324f84OZqne+NSFv7808/Y2JLRpkRB/sn8yHR2CR20Si9KkFRHBPEfCmg57SfLk79Q9WJ8gL5U+qzBBUQ8eR6WYSJ9keq4RGAvLfNWClAfed96PZ8KoxswHFvsovgVbOmZjBrptowhAJwfyI4DMotguT2nUprb6VrhkQJR3kFIQ+eN+40zs5fM4F1WBaOxiCfsn3KXOM8mcPRb2DXHZNlM2iS6APtpSPSbKWRmkSB2K7r/BEhILnbNlb6H/dy7V8AAcJUknVfw/R5CQRsOqsRQop1rXW7sdPFv6gF2EIT/RTSFsStdkFZ9xiLE7EUJAQ6DwQdZ+fhTh91/pJHRDAi+wRd97wJHUdweOSO0/MAsan0WMoinbKqmXKP3igdCepnxjdePSbQTNVZsNRkE6XQOUzi/yNEr93/M5EN9K8ftfIdXsbDNe8IPEUvFZoBMHlonN3knE+CTC4nsqKntaSuGFfY8gRiarrXpcdTCwAViBoRh6MKg5Rs4OoiIlWxLoJ8uRGLLJz0I6FOwzkOnqcVDoesdLFdmwwtXrx2Vdr+jiO2TZdcDk7aW34PoRV7O5N/++/24KQak6E1NIhmXTHZGPAXbDZd1/KqeIQew+H2ayyNpWZ8=
   on:
     tags: true
     repo: okken/cards
