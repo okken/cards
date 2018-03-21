@@ -14,9 +14,8 @@ URL = 'https://github.com/okken/cards'
 EMAIL = 'brian@pythontesting.net'
 AUTHOR = 'Brian Okken'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = '0.1.4'
 
-REQUIRED = [ 'Click==6.7', 'tinydb==3.8.0', 'attrs==17.4.0' ]
+REQUIRED = [ 'click', 'tinydb', 'attrs' ]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
