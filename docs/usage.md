@@ -3,36 +3,79 @@ Usage
 
 Cards is implemented as a command line application.
 
-Preconditions
--------------
-
-If cards is installed (with `python setup.py install`) you may use it from your command line.
-
 Console Help
 -------------
-To invoke the usage on the commandline call `cards --help` 
-Here is the output from the version 0.1.5:
+To invoke the usage on the commandline call `cards --help`
+Here is the output from the version 0.1.10:
 
 ```
-  Usage: cards [OPTIONS] COMMAND [ARGS]...
+$ cards --help
+Usage: cards [OPTIONS] COMMAND [ARGS]...
 
-    Run the cards application.
+  Run the cards application.
 
-  Options:
-    --version   Show the version and exit.
-    -h, --help  Show this message and exit.
+Options:
+  --version   Show the version and exit.
+  -h, --help  Show this message and exit.
 
-  Commands:
-    add     add a card
-    count   list count
-    delete  delete a card
-    list    list cards
-    update  update card
+Commands:
+  add     add a card
+  count   list count
+  delete  delete a card
+  list    list cards
+  update  update card
 ```
 
-To get help on the commands options and arguements use `cards [command] --help`
+To get help on the commands options and arguements use `cards [command] --help`.
 
-**NOTE:** *The details of the commands will not be listed here but described in the following sections*
+Here are a few...
+
+Adding a card
+-------------
+
+```
+$ cards add --help
+Usage: cards add [OPTIONS] SUMMARY
+
+  add a card
+
+Options:
+  -o, --owner TEXT  set the card owner
+  -h, --help        Show this message and exit.
+```
+
+Listing cards
+-------------
+
+```
+cards list --help
+Usage: cards list [OPTIONS]
+
+  list cards
+
+Options:
+  -n, --noowner       filter on the card without owners
+  -o, --owner TEXT    filter on the card owner
+  -d, --done BOOLEAN  filter on cards with given done state
+  -h, --help          Show this message and exit.
+```
+
+Updating a card
+---------------
+
+```
+$ cards update --help
+Usage: cards update [OPTIONS] CARD_ID
+
+  update card
+
+Options:
+  -o, --owner TEXT    change the card owner
+  -s, --summary TEXT  change the card summary
+  -d, --done BOOLEAN  change the card done state (True or False)
+  -h, --help          Show this message and exit.
+```
+
 
 Basic Actions
 -------------
@@ -41,13 +84,13 @@ Basic Actions
 |-----------------------|----------------|
 | add a card            | `cards add "name of the task in strings"` |
 | show your cards       | `cards list` |
-| delete a card         | `cards [id]` |
+| delete a card         | `cards delete [id]` |
 | show your cards       | `cards count` |
 
-Options 
+Options
 ---------
 
-The following options are supported by some of the commands 
+The following options are supported by some of the commands
 
 | Options                    | Description |
 |----------------------------|-----------------------------|

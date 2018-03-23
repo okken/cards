@@ -1,7 +1,12 @@
 History
 =======
 
-0.1.8 (2018-03-21)
+0.1.10 (2018-03-23)
+------------------
+- add filtering to list command
+- thank you Felix Häberle for starting this work
+
+0.1.9 (2018-03-21)
 ------------------
 - remove coveralls.io (version 0.1.9)
 - add coveralls.io (version 0.1.8)
