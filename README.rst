@@ -38,8 +38,7 @@ Follow along, starting with `episode 37 <http://testandcode.com/37>`__.
 Usage
 -----
 
-See usage_ page for details, but here's a demo of how it works:
-
+See usage_ page for details, but here's a demo of how it works::
 
     $ cards add 'a todo'
 
