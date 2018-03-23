@@ -84,5 +84,5 @@ See usage_ page for details, but here's a demo of how it works::
       update  update card
 
 
-.. _usage: http://www.python.org/
+.. _usage: https://cards-project.readthedocs.io/en/latest/usage/
 
