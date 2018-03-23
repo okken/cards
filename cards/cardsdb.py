@@ -41,9 +41,31 @@ class CardsDB():
         """Return a card with a matching id."""
         return Card.from_dict(self._db.get(doc_id=card_id))
 
-    def list_cards(self) -> List[Card]:
+    def list_cards(self, noowner=None, owner=None, done=None) -> List[Card]:
         """Return a list of all cards."""
-        return [Card.from_dict(t) for t in self._db]
+        q = tinydb.Query()
+        if noowner and owner:
+            results = self._db.search(
+                (q.owner == owner) |
+                (q.owner == None) |  # noqa : is None doesn't work for TinyDb
+                (q.owner == ''))
+        elif noowner or owner == '':
+            results = self._db.search((q.owner == None) |  # noqa
+                                      (q.owner == ''))
+        elif owner:
+            results = self._db.search(q.owner == owner)
+        else:
+            results = self._db
+
+        if done is None:
+            # return all cards
+            return [Card.from_dict(t) for t in results]
+        elif done:
+            # only done cards
+            return [Card.from_dict(t) for t in results if t['done']]
+        else:
+            # only not done cards
+            return [Card.from_dict(t) for t in results if not t['done']]
 
     def count(self) -> int:
         """Return the number of cards in db."""

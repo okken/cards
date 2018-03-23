@@ -42,40 +42,28 @@ def test_list(db_empty, runner):
 
 
 @pytest.mark.smoke
-def test_list_filter_owner(db_empty, runner):
-    # GIVEN a db with known contents
+def test_list_filter(db_empty, runner):
+    # GIVEN
+    #  two items owned by okken, one that is done
+    #  two items with no owner, one that is done
     runner.invoke(cards.cli.cards_cli, ['add', '-o', 'okken', 'one'])
     runner.invoke(cards.cli.cards_cli, ['add', '-o', 'anyone', 'two'])
-    runner.invoke(cards.cli.cards_cli, ['add', 'three'])
+    runner.invoke(cards.cli.cards_cli, ['add', '-o', 'okken', 'three'])
+    runner.invoke(cards.cli.cards_cli, ['add', 'four'])
+    runner.invoke(cards.cli.cards_cli, ['add', 'five'])
 
-    # `cards list -o okken` returns only 1 card
-    result = runner.invoke(cards.cli.cards_cli, ['list', '-o', 'okken'])
+    runner.invoke(cards.cli.cards_cli, ['update', '3', '-d', 'True'])
+    runner.invoke(cards.cli.cards_cli, ['update', '4', '-d', 'True'])
+
+    # `cards --noowner -o okken -d True` should return two items
+    result = runner.invoke(cards.cli.cards_cli,
+                           ['list', '--noowner', '-o', 'okken', '-d', 'True'])
     expected = ("  ID      owner  done summary\n"
                 "  --      -----  ---- -------\n"
-                "   1      okken       one\n")
-    assert expected == result.output
-
-    # `cards list -o anyone` returns only 1 card
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--owner', 'anyone'])
-    expected = ("  ID      owner  done summary\n"
-                "  --      -----  ---- -------\n"
-                "   2     anyone       two\n")
-    assert expected == result.output
-
-    # `cards list --noowner` returns only 1 card
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--noowner'])
-    expected = ("  ID      owner  done summary\n"
-                "  --      -----  ---- -------\n"
-                "   3                  three\n")
-    assert expected == result.output
-
-    # `cards list --nooner -o okken` returns 2 cards
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--noowner', '-o', 'okken'])
-    expected = ("  ID      owner  done summary\n"
-                "  --      -----  ---- -------\n"
-                "   1      okken       one\n"
-                "   3                  three\n")
-    assert expected == result.output
+                "   3      okken    x  three\n"
+                "   4               x  four\n")
+    output = result.output
+    assert expected == output
 
 
 @pytest.mark.smoke

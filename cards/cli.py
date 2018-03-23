@@ -12,7 +12,7 @@ import pathlib
 def cards_cli(ctx):
     """Run the cards application."""
     if ctx.invoked_subcommand is None:
-        ctx.invoke(list_cards)
+        ctx.invoke(list_cards, noowner=None, owner=None, done=None)
 
 
 @cards_cli.command(help="add a card")
@@ -32,43 +32,24 @@ def delete(card_id):
 
 
 @cards_cli.command(name="list", help="list cards")
-@click.option('-o', '--owner', default='',
-              help='filter on the card owner')
-@click.option('--noowner', is_flag=True,
+@click.option('-n', '--noowner', default=None, is_flag=True,
               help='filter on the card without owners')
-def list_cards(owner, noowner):
+@click.option('-o', '--owner', default=None,
+              help='filter on the card owner')
+@click.option('-d', '--done', default=None,
+              type=bool,
+              help='filter on cards with given done state')
+def list_cards(noowner, owner, done):
     """
     List cards in db.
-
-    If owner given, only list cards with that owner.
-    Additional the no_owner flag will show unassigned tasks.
-
-    Both options may be combinded.
     """
     formatstr = "{: >4} {: >10} {: >5} {}"
     print(formatstr.format('ID', 'owner', 'done', 'summary'))
     print(formatstr.format('--', '-----', '----', '-------'))
-    all_cards = cards_db().list_cards() 
-    for t in all_cards:
+    for t in cards_db().list_cards(noowner, owner, done):
         done = ' x ' if t.done else ''
-        task_owner = '' if t.owner is None else t.owner
-        show_card = False
-
-        # no filter condition set - show all
-        if owner is '' and noowner == False:
-            show_card = True
-
-        # no owner filter is set - show all wihtout owners
-        if noowner and task_owner == '':
-            show_card = True
-            
-        # owner on task equals filter value - show all owner
-        if task_owner != '' and task_owner == owner:
-            show_card = True
-        
-        if show_card:
-            print(formatstr.format(
-                  t.id, task_owner, done, t.summary))
+        owner = '' if t.owner is None else t.owner
+        print(formatstr.format(t.id, owner, done, t.summary))
 
 
 @cards_cli.command(help="update card")
