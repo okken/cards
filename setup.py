@@ -41,16 +41,18 @@ def find_version(*file_paths):
     raise RuntimeError("Unable to find version string.")
 
 
+
 setup(
     name=NAME,
-    version=find_version('cards', '__init__.py'),
+    version=find_version('src', 'cards', '__init__.py'),
     description=DESCRIPTION,
     long_description=long_description,
     author=AUTHOR,
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    packages=find_packages(exclude=('tests',)),
+    packages=find_packages(where="src"),
+    package_dir={"": "src"},
     entry_points={
         'console_scripts': ['cards=cards.cli:cards_cli'],
     },
