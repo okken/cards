@@ -1,6 +1,11 @@
 History
 =======
 
+0.1.11 (2018-03-28)
+------------------
+- restructure to use src dir
+- more thourogh testing for filter
+
 0.1.10 (2018-03-23)
 ------------------
 - add filtering to list command
