@@ -85,7 +85,7 @@ Basic Actions
 | add a card            | `cards add "name of the task in strings"` |
 | show your cards       | `cards list` |
 | delete a card         | `cards delete [id]` |
-| show your cards       | `cards count` |
+| count your cards      | `cards count` |
 
 Options
 ---------
