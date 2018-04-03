@@ -19,7 +19,6 @@ def some_cards():
             # only way to remove an owner from the CLI is is to update it
             # with a blank string
             Card(summary='five', owner='')]
-    return
 
 
 @pytest.fixture()
