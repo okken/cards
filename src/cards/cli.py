@@ -67,9 +67,16 @@ def update(card_id, owner, summary, done):
 
 
 @cards_cli.command(help="list count")
-def count():
+@click.option('-n', '--noowner', default=None, is_flag=True,
+              help='count cards without owners')
+@click.option('-o', '--owner', default=None,
+              help='count cards with given owner')
+@click.option('-d', '--done', default=None,
+              type=bool,
+              help='count cards with given done state')
+def count(noowner, owner, done):
     """Return number of cards in db."""
-    print(cards_db().count())
+    print(len(cards_db().list_cards(noowner, owner, done)))
 
 
 def cards_db():
