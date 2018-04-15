@@ -15,7 +15,7 @@ EMAIL = 'brian@pythontesting.net'
 AUTHOR = 'Brian Okken'
 REQUIRES_PYTHON = '>=3.6.0'
 
-REQUIRED = [ 'click', 'tinydb', 'attrs' ]
+REQUIRED = ['click', 'tinydb', 'attrs', 'tabulate']
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
