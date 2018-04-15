@@ -67,9 +67,9 @@ class CardsDB():
             # only not done cards
             return [Card.from_dict(t) for t in results if not t['done']]
 
-    def count(self) -> int:
+    def count(self, noowner=None, owner=None, done=None) -> int:
         """Return the number of cards in db."""
-        return len(self._db)
+        return len(self.list_cards(noowner, owner, done))
 
     def update(self, card_id: int, card_mods: Card) -> None:
         """Update a card with modifications."""

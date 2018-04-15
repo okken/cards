@@ -76,7 +76,7 @@ def update(card_id, owner, summary, done):
               help='count cards with given done state')
 def count(noowner, owner, done):
     """Return number of cards in db."""
-    print(len(cards_db().list_cards(noowner, owner, done)))
+    print(cards_db().count(noowner, owner, done))
 
 
 def cards_db():
