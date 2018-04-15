@@ -12,6 +12,18 @@ import cards.cli
 pytestmark = pytest.mark.cli
 
 
+def _detabulate_output(output):
+    """
+    Turn a tabulate output into a tuple of headers and rows
+    assuming the output was formatted in the "jira" style
+    """
+    lines = output.split('\n')
+    headers = lines[0].split('||')
+    headers = [header.strip() for header in headers[1:-1]]
+    values = [[item.strip() for item in row.split('|')[1:-1]] for row in lines[1:]]
+    return headers, values
+
+
 @pytest.mark.smoke
 def test_add(db_empty, runner):
     # GIVEN an empty database
@@ -19,11 +31,10 @@ def test_add(db_empty, runner):
     runner.invoke(cards.cli.cards_cli, ['add', 'something'])
 
     # THEN The listing returns just the new card
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=simple'])
-    expected_output = ("  ID      owner  done summary\n"
-                       "  --      -----  ---- -------\n"
-                       "   1                  something\n")
-    assert expected_output == result.output
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    headers, items = _detabulate_output(result.output)
+    assert headers == ['ID', 'owner', 'done', 'summary']
+    assert items[0][3] == 'something'
 
 
 @pytest.mark.smoke
@@ -33,12 +44,13 @@ def test_list(db_empty, runner):
     runner.invoke(cards.cli.cards_cli, ['add', 'two'])
 
     # `cards list` returns our 2 cards
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=simple'])
-    expected = ("  ID      owner  done summary\n"
-                "  --      -----  ---- -------\n"
-                "   1                  one\n"
-                "   2                  two\n")
-    assert expected == result.output
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    headers, items = _detabulate_output(result.output)
+    assert headers == ['ID', 'owner', 'done', 'summary']
+    assert items[0][0] == '1'
+    assert items[0][3] == 'one'
+    assert items[1][0] == '2'
+    assert items[1][3] == 'two'
 
 
 @pytest.mark.smoke
@@ -57,13 +69,13 @@ def test_list_filter(db_empty, runner):
 
     # `cards --noowner -o okken -d True` should return two items
     result = runner.invoke(cards.cli.cards_cli,
-                           ['list', '--noowner', '-o', 'okken', '-d', 'True', '--tableformat=simple'])
-    expected = ("  ID      owner  done summary\n"
-                "  --      -----  ---- -------\n"
-                "   3      okken    x  three\n"
-                "   4               x  four\n")
-    output = result.output
-    assert expected == output
+                           ['list', '--noowner', '-o', 'okken', '-d', 'True', '--tableformat=jira'])
+    headers, items = _detabulate_output(result.output)
+    assert headers == ['ID', 'owner', 'done', 'summary']
+    assert items[0][0] == '3'
+    assert items[0][3] == 'three'
+    assert items[1][0] == '4'
+    assert items[1][3] == 'four'
 
 
 @pytest.mark.smoke
@@ -82,7 +94,7 @@ def test_count(db_empty, runner):
 @pytest.mark.smoke
 def test_update(db_non_empty, runner):
     # GIVEN a card known to be in the db
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=simple'])
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=ijra'])
 
     # this is kinda tricky
     last_item_as_list = result.output.split('\n')[-2].split()
@@ -94,7 +106,7 @@ def test_update(db_non_empty, runner):
                   ['update', '-o', 'okken', '-d', 'True', orig_id])
 
     # THEN `cards list` will show the changes
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=simple'])
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
     last_item_as_list = result.output.split('\n')[-2].split()
     id = last_item_as_list[0]
     owner = last_item_as_list[1]
@@ -117,8 +129,8 @@ def test_delete(db_empty, runner):
     runner.invoke(cards.cli.cards_cli, ['delete', '1'])
 
     # THEN the other card remains in the db
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=simple'])
-    expected = ("  ID      owner  done summary\n"
-                "  --      -----  ---- -------\n"
-                "   2                  two\n")
-    assert expected == result.output
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    headers, items = _detabulate_output(result.output)
+    assert headers == ['ID', 'owner', 'done', 'summary']
+    assert items[0][0] == '2'
+    assert items[0][3] == 'two'
