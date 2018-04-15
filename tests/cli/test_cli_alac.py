@@ -48,7 +48,6 @@ def test_alac_1(db_empty, runner):
     assert items[1] == ['2', 'okken', '', 'something else']
     assert items[2] == ['3', '', '', 'Foo Bar Baz']
 
-
     # 3. Change the owner on a card. Verify change.
     runner.invoke(cards_cli, ['update', '1', '-o', 'okken'])
     result = runner.invoke(cards_cli, ['list', '--tableformat=jira'])

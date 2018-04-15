@@ -57,7 +57,8 @@ def test_list_filter(db_empty, runner):
 
     # `cards --noowner -o okken -d True` should return two items
     result = runner.invoke(cards.cli.cards_cli,
-                           ['list', '--noowner', '-o', 'okken', '-d', 'True', '--tableformat=jira'])
+                           ['list', '--noowner', '-o', 'okken',
+                            '-d', 'True', '--tableformat=jira'])
     headers, items = detabulate_output(result.output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0][0] == '3'
