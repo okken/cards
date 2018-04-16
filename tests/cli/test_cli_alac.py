@@ -87,7 +87,15 @@ def test_alac_1(db_empty, runner):
                 "   3                  just sit\n")
     assert expected == result.output
 
-    # let's also check the count
+    # let's also check the counts
     result = runner.invoke(cards_cli, ['count'])
     expected = "2\n"
+    assert expected == result.output
+
+    result = runner.invoke(cards_cli, ['count', '-o', 'okken'])
+    expected = "1\n"
+    assert expected == result.output
+
+    result = runner.invoke(cards_cli, ['count', '-n'])
+    expected = "1\n"
     assert expected == result.output
