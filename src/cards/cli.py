@@ -1,8 +1,12 @@
 """Command Line Interface (CLI) for cards project."""
 
+import os
 import click
 import cards
 import pathlib
+from tabulate import tabulate
+
+DEFAULT_TABLEFORMAT = os.environ.get('CARDSTABLEFORMAT', 'simple')
 
 
 @click.group(invoke_without_command=True,
@@ -39,17 +43,21 @@ def delete(card_id):
 @click.option('-d', '--done', default=None,
               type=bool,
               help='filter on cards with given done state')
-def list_cards(noowner, owner, done):
+@click.option('--tableformat', default=DEFAULT_TABLEFORMAT,
+              type=str,
+              help='table formatting option, eg. "grid", "simple", "html"')
+def list_cards(noowner, owner, done, tableformat):
     """
     List cards in db.
     """
-    formatstr = "{: >4} {: >10} {: >5} {}"
-    print(formatstr.format('ID', 'owner', 'done', 'summary'))
-    print(formatstr.format('--', '-----', '----', '-------'))
+    items = []
     for t in cards_db().list_cards(noowner, owner, done):
         done = ' x ' if t.done else ''
         owner = '' if t.owner is None else t.owner
-        print(formatstr.format(t.id, owner, done, t.summary))
+        items.append((t.id, owner, done, t.summary))
+    print(tabulate(items,
+                   headers=('ID', 'owner', 'done', 'summary'),
+                   tablefmt=tableformat))
 
 
 @cards_cli.command(help="update card")

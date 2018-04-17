@@ -5,7 +5,7 @@ import io
 import os
 import re
 
-from setuptools import find_packages, setup, Command
+from setuptools import find_packages, setup
 
 # Package meta-data.
 NAME = 'cards'
@@ -15,7 +15,7 @@ EMAIL = 'brian@pythontesting.net'
 AUTHOR = 'Brian Okken'
 REQUIRES_PYTHON = '>=3.6.0'
 
-REQUIRED = [ 'click', 'tinydb', 'attrs' ]
+REQUIRED = ['click', 'tinydb', 'attrs', 'tabulate']
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -28,9 +28,11 @@ here = os.path.abspath(os.path.dirname(__file__))
 with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = '\n' + f.read()
 
+
 def read(*parts):
     with io.open(os.path.join(here, *parts), 'r') as fp:
         return fp.read()
+
 
 def find_version(*file_paths):
     version_file = read(*file_paths)
@@ -39,7 +41,6 @@ def find_version(*file_paths):
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
-
 
 
 setup(
