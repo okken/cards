@@ -15,7 +15,11 @@ EMAIL = 'brian@pythontesting.net'
 AUTHOR = 'Brian Okken'
 REQUIRES_PYTHON = '>=3.6.0'
 
-REQUIRED = ['click', 'tinydb', 'attrs', 'tabulate']
+REQUIRED = ['click', 'tabulate',  # for CLI
+            'tinydb',             # for DB
+            # built in dataclass for Python 3.7 (instead of attrs)
+            "attrs; python_version<'3.7'",  # cli <-> db data type
+            ]
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
@@ -65,6 +69,7 @@ setup(
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: Implementation :: CPython',
         'Programming Language :: Python :: Implementation :: PyPy'
     ],
