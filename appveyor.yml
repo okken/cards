@@ -1,31 +1,16 @@
+bu$ld: false  # Not a C# project
 environment:
-
   matrix:
+    - TOXENV: py36
 
-    # For Python versions available on Appveyor, see
-    # http://www.appveyor.com/docs/installed-software#python
-    # The list here is complete (excluding Python 2.6, which
-    # isn't covered by this document) at the time of writing.
-
-    - PYTHON: "C:\\Python36"
-    #- PYTHON: "C:\\Python36-x64"
-    #- PYTHON: "C:\\Miniconda36"
-    #- PYTHON: "C:\\Miniconda36-x64"
+matrix:
+  fast_finish: true
 
 install:
-  - "%PYTHON%\\python.exe -m pip install --upgrade wheel pytest flake8 tox"
-
-build: off
+  - C:\Python36\python -m pip install -U pytest
 
 test_script:
-  # to put the Python version you want to use on PATH.
-  - "%PYTHON%\\python.exe -m tox -e py36"
+  - C:\Python36\scripts\tox -e py36
 
-after_test:
-  # This step builds your wheels.
-  - "%PYTHON%\\python.exe setup.py bdist_wheel"
-
-artifacts:
-  # bdist_wheel puts your built wheel in the dist directory
-  - path: dist\*
-
+cache:
+  - '%LOCALAPPDATA%\pip\cache'
