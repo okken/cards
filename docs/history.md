@@ -1,6 +1,12 @@
 History
 =======
 
+0.1.12 (2018-04-26)
+------------------
+- list now supports --format and accepts all formats that the tabulate package
+formats.
+- uses dataclass insead of attrs for Python 3.7
+
 0.1.11 (2018-03-28)
 ------------------
 - restructure to use src dir
