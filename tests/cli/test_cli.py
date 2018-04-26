@@ -19,7 +19,7 @@ def test_add(db_empty, runner):
     runner.invoke(cards.cli.cards_cli, ['add', 'something'])
 
     # THEN The listing returns just the new card
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0][3] == 'something'
@@ -32,7 +32,7 @@ def test_list(db_empty, runner):
     runner.invoke(cards.cli.cards_cli, ['add', 'two'])
 
     # `cards list` returns our 2 cards
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0][0] == '1'
@@ -58,7 +58,7 @@ def test_list_filter(db_empty, runner):
     # `cards --noowner -o okken -d True` should return two items
     result = runner.invoke(cards.cli.cards_cli,
                            ['list', '--noowner', '-o', 'okken',
-                            '-d', 'True', '--tableformat=jira'])
+                            '-d', 'True', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0][0] == '3'
@@ -83,7 +83,7 @@ def test_count(db_empty, runner):
 @pytest.mark.smoke
 def test_update(db_non_empty, runner):
     # GIVEN a card known to be in the db
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--format=jira'])
 
     _, orig_items = detabulate_output(result.output)
 
@@ -92,7 +92,7 @@ def test_update(db_non_empty, runner):
                   ['update', '-o', 'okken', '-d', 'True', orig_items[1][0]])
 
     # THEN `cards list` will show the changes
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--format=jira'])
     _, new_items = detabulate_output(result.output)
     assert orig_items[1][0] == new_items[1][0]
     assert new_items[1][1] == 'okken'
@@ -111,7 +111,7 @@ def test_delete(db_empty, runner):
     runner.invoke(cards.cli.cards_cli, ['delete', '1'])
 
     # THEN the other card remains in the db
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards.cli.cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0][0] == '2'

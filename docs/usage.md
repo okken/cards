@@ -57,6 +57,7 @@ Options:
   -n, --noowner       filter on the card without owners
   -o, --owner TEXT    filter on the card owner
   -d, --done BOOLEAN  filter on cards with given done state
+  -f, --format TEXT   table formatting option, eg. "grid", "simple", "html"
   -h, --help          Show this message and exit.
 ```
 

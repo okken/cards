@@ -43,10 +43,10 @@ def delete(card_id):
 @click.option('-d', '--done', default=None,
               type=bool,
               help='filter on cards with given done state')
-@click.option('--tableformat', default=DEFAULT_TABLEFORMAT,
+@click.option('-f', '--format', default=DEFAULT_TABLEFORMAT,
               type=str,
               help='table formatting option, eg. "grid", "simple", "html"')
-def list_cards(noowner, owner, done, tableformat):
+def list_cards(noowner, owner, done, format):
     """
     List cards in db.
     """
@@ -57,7 +57,7 @@ def list_cards(noowner, owner, done, tableformat):
         items.append((t.id, owner, done, t.summary))
     print(tabulate(items,
                    headers=('ID', 'owner', 'done', 'summary'),
-                   tablefmt=tableformat))
+                   tablefmt=format))
 
 
 @cards_cli.command(help="update card")

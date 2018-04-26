@@ -41,7 +41,7 @@ def test_alac_1(db_empty, runner):
     runner.invoke(cards_cli, ['add', 'Foo Bar Baz'])
 
     # 2. Make sure they show up in the list.
-    result = runner.invoke(cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0] == ['1', '', '', 'something']
@@ -50,25 +50,25 @@ def test_alac_1(db_empty, runner):
 
     # 3. Change the owner on a card. Verify change.
     runner.invoke(cards_cli, ['update', '1', '-o', 'okken'])
-    result = runner.invoke(cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert items[0] == ['1', 'okken', '', 'something']
 
     # 4. Change the done state on a card. Verify change.
     runner.invoke(cards_cli, ['update', '2', '-d', 'True'])
-    result = runner.invoke(cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert items[1] == ['2', 'okken', 'x', 'something else']
 
     # 5. Change the sumary on a card. Verify change.
     runner.invoke(cards_cli, ['update', '3', '-s', 'just sit'])
-    result = runner.invoke(cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert items[2] == ['3', '', '', 'just sit']
 
     # 6. Delete the done item. Verify change.
     runner.invoke(cards_cli, ['delete', '2'])
-    result = runner.invoke(cards_cli, ['list', '--tableformat=jira'])
+    result = runner.invoke(cards_cli, ['list', '--format=jira'])
     headers, items = detabulate_output(result.output)
     assert ['2', 'okken', 'x', 'something'] not in items
 
