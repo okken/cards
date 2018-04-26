@@ -3,6 +3,7 @@
 import os
 import click
 import cards
+import json
 import pathlib
 from tabulate import tabulate
 
@@ -50,11 +51,25 @@ def list_cards(noowner, owner, done, format):
     """
     List cards in db.
     """
+    the_cards = cards_db().list_cards(noowner, owner, done)
+
+    #  json is a special case, so let's do that first
+    if format == 'json':
+        items = [c.to_dict() for c in the_cards]
+        print(json.dumps({"cards": items}, sort_keys=True, indent=4))
+        return
+
+    # who's going to remember 'pipe' for markdown?
+    if format == 'markdown':
+        format = 'pipe'
+
+    # all formats except json use tabulate
     items = []
-    for t in cards_db().list_cards(noowner, owner, done):
+    for t in the_cards:
         done = ' x ' if t.done else ''
         owner = '' if t.owner is None else t.owner
         items.append((t.id, owner, done, t.summary))
+
     print(tabulate(items,
                    headers=('ID', 'owner', 'done', 'summary'),
                    tablefmt=format))
