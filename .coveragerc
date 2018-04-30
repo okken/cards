@@ -1,0 +1,12 @@
+[run]
+branch = True
+source =
+    cards
+
+[paths]
+source =
+   src/cards
+   .tox/*/lib/python*/site-packages/cards
+
+[report]
+show_missing = True
