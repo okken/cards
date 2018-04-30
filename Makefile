@@ -79,6 +79,7 @@ coverage: ## check code coverage quickly with the default Python
 	$(BROWSER) htmlcov/index.html
 
 docs: ## generate HTML documentation
+	pip install mkdocs
 	mkdocs build
 
 servedocs: docs ## compile the docs watching for changes
