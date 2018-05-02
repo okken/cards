@@ -53,7 +53,7 @@ def list_cards(noowner, owner, done, format):
     """
     the_cards = cards_db().list_cards(noowner, owner, done)
 
-    #  json is a special case, so let's do that first
+    #  json is a special case
     if format == 'json':
         items = [c.to_dict() for c in the_cards]
         print(json.dumps({"cards": items}, sort_keys=True, indent=4))
@@ -63,7 +63,15 @@ def list_cards(noowner, owner, done, format):
     if format == 'markdown':
         format = 'pipe'
 
-    # all formats except json use tabulate
+    if format == 'packed':
+        for t in the_cards:
+            done = 'x' if t.done else 'o'
+            owner = 'unassigned' if t.owner is None else t.owner
+            line = f'{t.id} {owner} {done} {t.summary}'
+            print(line)
+        return
+
+    # all formats except json/none use tabulate
     items = []
     for t in the_cards:
         done = ' x ' if t.done else ''

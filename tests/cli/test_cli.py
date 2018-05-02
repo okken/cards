@@ -13,27 +13,27 @@ pytestmark = pytest.mark.cli
 
 
 @pytest.mark.smoke
-def test_add(db_empty, runner):
+def test_add(db_empty, cards_cli):
     # GIVEN an empty database
     # WHEN a new card is added
-    runner.invoke(cards.cli.cards_cli, ['add', 'something'])
+    cards_cli('add something')
 
     # THEN The listing returns just the new card
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--format=jira'])
-    headers, items = detabulate_output(result.output)
+    output = cards_cli('list --format=jira')
+    headers, items = detabulate_output(output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0][3] == 'something'
 
 
 @pytest.mark.smoke
-def test_list(db_empty, runner):
+def test_list(db_empty, cards_cli):
     # GIVEN a db with known contents of 2 cards
-    runner.invoke(cards.cli.cards_cli, ['add', 'one'])
-    runner.invoke(cards.cli.cards_cli, ['add', 'two'])
+    cards_cli('add one')
+    cards_cli('add two')
 
     # `cards list` returns our 2 cards
-    result = runner.invoke(cards.cli.cards_cli, ['list', '--format=jira'])
-    headers, items = detabulate_output(result.output)
+    output = cards_cli('list --format=jira')
+    headers, items = detabulate_output(output)
     assert headers == ['ID', 'owner', 'done', 'summary']
     assert items[0][0] == '1'
     assert items[0][3] == 'one'
@@ -42,29 +42,23 @@ def test_list(db_empty, runner):
 
 
 @pytest.mark.smoke
-def test_list_filter(db_empty, runner):
+def test_list_filter(db_empty, cards_cli):
     # GIVEN
     #  two items owned by okken, one that is done
     #  two items with no owner, one that is done
-    runner.invoke(cards.cli.cards_cli, ['add', '-o', 'okken', 'one'])
-    runner.invoke(cards.cli.cards_cli, ['add', '-o', 'anyone', 'two'])
-    runner.invoke(cards.cli.cards_cli, ['add', '-o', 'okken', 'three'])
-    runner.invoke(cards.cli.cards_cli, ['add', 'four'])
-    runner.invoke(cards.cli.cards_cli, ['add', 'five'])
-
-    runner.invoke(cards.cli.cards_cli, ['update', '3', '-d', 'True'])
-    runner.invoke(cards.cli.cards_cli, ['update', '4', '-d', 'True'])
+    cards_cli('add -o okken one')
+    cards_cli('add -o anyone two')
+    cards_cli('add -o okken three')
+    cards_cli('add four')
+    cards_cli('add five')
+    cards_cli('update 3 -d True')
+    cards_cli('update 4 -d True')
 
     # `cards --noowner -o okken -d True` should return two items
-    result = runner.invoke(cards.cli.cards_cli,
-                           ['list', '--noowner', '-o', 'okken',
-                            '-d', 'True', '--format=jira'])
-    headers, items = detabulate_output(result.output)
-    assert headers == ['ID', 'owner', 'done', 'summary']
-    assert items[0][0] == '3'
-    assert items[0][3] == 'three'
-    assert items[1][0] == '4'
-    assert items[1][3] == 'four'
+    output = cards_cli('list --noowner -o okken -d True --format=jira')
+    headers, items = detabulate_output(output)
+    assert [['3', 'okken', 'x', 'three'],
+            ['4', ''     , 'x', 'four' ]] == items  # noqa:E202,E203
 
 
 @pytest.mark.smoke

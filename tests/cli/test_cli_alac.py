@@ -14,15 +14,13 @@ Cons:
 """
 
 import pytest
-from cards.cli import cards_cli
-from . import detabulate_output
-
+from textwrap import dedent
 
 pytestmark = pytest.mark.cli
 
 
 @pytest.mark.alac
-def test_alac_1(db_empty, runner):
+def test_alac_1(db_empty, cards_cli):
     """
     Starting from an empty list.
     1. Add 3 items
@@ -36,51 +34,54 @@ def test_alac_1(db_empty, runner):
     # Starting from an empty list.
 
     # 1. Add 3 items
-    runner.invoke(cards_cli, ['add', 'something'])
-    runner.invoke(cards_cli, ['add', 'something else', '-o', 'okken'])
-    runner.invoke(cards_cli, ['add', 'Foo Bar Baz'])
+    cards_cli('add something')
+    cards_cli('add "something else" -o okken')
+    cards_cli('add "Foo Bar Baz"')
 
     # 2. Make sure they show up in the list.
-    result = runner.invoke(cards_cli, ['list', '--format=jira'])
-    headers, items = detabulate_output(result.output)
-    assert headers == ['ID', 'owner', 'done', 'summary']
-    assert items[0] == ['1', '', '', 'something']
-    assert items[1] == ['2', 'okken', '', 'something else']
-    assert items[2] == ['3', '', '', 'Foo Bar Baz']
+    output = cards_cli('list --format=packed')
+    expected = dedent("""\
+    1 unassigned o something
+    2 okken o something else
+    3 unassigned o Foo Bar Baz""")
+    assert expected == output
 
     # 3. Change the owner on a card. Verify change.
-    runner.invoke(cards_cli, ['update', '1', '-o', 'okken'])
-    result = runner.invoke(cards_cli, ['list', '--format=jira'])
-    headers, items = detabulate_output(result.output)
-    assert items[0] == ['1', 'okken', '', 'something']
+    cards_cli('update 1 -o okken')
+    output = cards_cli('list --format=packed')
+    expected = dedent("""\
+    1 okken o something
+    2 okken o something else
+    3 unassigned o Foo Bar Baz""")
+    assert expected == output
 
     # 4. Change the done state on a card. Verify change.
-    runner.invoke(cards_cli, ['update', '2', '-d', 'True'])
-    result = runner.invoke(cards_cli, ['list', '--format=jira'])
-    headers, items = detabulate_output(result.output)
-    assert items[1] == ['2', 'okken', 'x', 'something else']
+    cards_cli('update 2 -d True')
+    output = cards_cli('list --format=packed')
+    expected = dedent("""\
+    1 okken o something
+    2 okken x something else
+    3 unassigned o Foo Bar Baz""")
+    assert expected == output
 
     # 5. Change the sumary on a card. Verify change.
-    runner.invoke(cards_cli, ['update', '3', '-s', 'just sit'])
-    result = runner.invoke(cards_cli, ['list', '--format=jira'])
-    headers, items = detabulate_output(result.output)
-    assert items[2] == ['3', '', '', 'just sit']
+    cards_cli('update 3 -s "just sit"')
+    output = cards_cli('list --format=packed')
+    expected = dedent("""\
+    1 okken o something
+    2 okken x something else
+    3 unassigned o just sit""")
+    assert expected == output
 
     # 6. Delete the done item. Verify change.
-    runner.invoke(cards_cli, ['delete', '2'])
-    result = runner.invoke(cards_cli, ['list', '--format=jira'])
-    headers, items = detabulate_output(result.output)
-    assert ['2', 'okken', 'x', 'something'] not in items
+    cards_cli('delete 2')
+    output = cards_cli('list --format=packed')
+    expected = dedent("""\
+    1 okken o something
+    3 unassigned o just sit""")
+    assert expected == output
 
     # let's also check the counts
-    result = runner.invoke(cards_cli, ['count'])
-    expected = "2\n"
-    assert expected == result.output
-
-    result = runner.invoke(cards_cli, ['count', '-o', 'okken'])
-    expected = "1\n"
-    assert expected == result.output
-
-    result = runner.invoke(cards_cli, ['count', '-n'])
-    expected = "1\n"
-    assert expected == result.output
+    assert '2' == cards_cli('count')
+    assert '1' == cards_cli('count -o okken')
+    assert '1' == cards_cli('count --noowner')

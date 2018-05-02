@@ -1,7 +1,8 @@
-from click.testing import CliRunner
+import click.testing
 import pytest
 import pathlib
 import cards.cli
+import shlex
 
 
 @pytest.fixture()
@@ -17,11 +18,22 @@ def db_empty(tmpdir, monkeypatch):
 
 @pytest.fixture()
 def runner():
-    return CliRunner()
+    return click.testing.CliRunner()
 
 
 @pytest.fixture()
-def db_non_empty(db_empty, runner):
-    runner.invoke(cards.cli.cards_cli, ['add', 'first item'])
-    runner.invoke(cards.cli.cards_cli, ['add', 'second item'])
-    runner.invoke(cards.cli.cards_cli, ['add', 'third item'])
+def cards_cli():
+    runner = click.testing.CliRunner()
+
+    def _invoke_cards(input_string):
+        input_list = shlex.split(input_string)
+        return runner.invoke(cards.cli.cards_cli, input_list).output.rstrip()
+
+    return _invoke_cards
+
+
+@pytest.fixture()
+def db_non_empty(db_empty, cards_cli):
+    cards_cli('add "first item"')
+    cards_cli('add "second item"')
+    cards_cli('add "third item"')
