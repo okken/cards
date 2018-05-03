@@ -54,7 +54,7 @@ clean-docs: ## remove mkdocs site
 	rm -fr site/
 
 lint: ## check style with flake8
-	flake8 cards tests
+	python3.6 -m flake8 --show-source src tests setup.py
 
 test: ## run tests quickly with the default Python
 	pytest
