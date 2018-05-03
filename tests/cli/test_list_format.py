@@ -5,10 +5,7 @@ This file contains tests related to design changes.
 """
 
 import json
-import pytest
 from textwrap import dedent
-
-pytestmark = pytest.mark.cli
 
 
 expected_output_default = """\

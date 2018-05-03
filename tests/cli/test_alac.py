@@ -16,8 +16,6 @@ Cons:
 import pytest
 from textwrap import dedent
 
-pytestmark = pytest.mark.cli
-
 
 @pytest.mark.alac
 def test_alac_1(db_empty, cards_cli):

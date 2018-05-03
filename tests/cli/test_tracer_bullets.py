@@ -10,7 +10,7 @@ import cards.cli
 from cards import Card
 from . import detabulate_output
 
-pytestmark = [pytest.mark.cli, pytest.mark.smoke]
+pytestmark = pytest.mark.smoke
 
 
 def test_add(db_empty, cards_cli):

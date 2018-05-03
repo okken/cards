@@ -1,4 +1,4 @@
-flake8
-tox
-coverage
 pytest
+coverage
+tox
+flake8
