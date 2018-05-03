@@ -23,8 +23,6 @@ REQUIRED = ['click', 'tabulate',  # for CLI
 
 # The rest you shouldn't have to touch too much :)
 # ------------------------------------------------
-# Except, perhaps the License and Trove Classifiers!
-# If you do change the License, remember to change the Trove Classifier for that!
 
 here = os.path.abspath(os.path.dirname(__file__))
 
