@@ -7,51 +7,27 @@ cardsdb :  The API
 import tinydb
 from typing import List
 
+from dataclasses import dataclass, field, asdict
 
-try:
-    # Python 3.7 and above
 
-    from dataclasses import dataclass, field, asdict
+@dataclass
+class Card:
+    summary: str = None
+    owner: str = None
+    done: bool = None
+    id: int = field(default=None, compare=False)
 
-    @dataclass
-    class Card():
-        summary: str = None
-        owner: str = None
-        done: bool = None
-        id: int = field(default=None, compare=False)
+    @classmethod
+    def from_dict(cls, d):
+        return Card(**d)
 
-        @classmethod
-        def from_dict(cls, d):
-            return Card(**d)  # dictionary unpacking as of Python 3.5, PEP 448
-
-        def to_dict(self):
-            return asdict(self)
-
-except ImportError:
-
-    # Python 3.6 and below
-
-    import attr
-
-    @attr.s
-    class Card(object):
-        summary: str = attr.ib(default=None)
-        owner: str = attr.ib(default=None)
-        done: bool = attr.ib(default=None)
-        id: int = attr.ib(default=None, cmp=False)
-
-        @classmethod
-        def from_dict(cls, d):
-            return Card(**d)  # dictionary unpacking as of Python 3.5, PEP 448
-
-        def to_dict(self):
-            return attr.asdict(self)
-
+    def to_dict(self):
+        return asdict(self)
 
 # --- actions on db
 
 
-class CardsDB():
+class CardsDB:
 
     def __init__(self, db_path):
         self._db = tinydb.TinyDB(db_path)

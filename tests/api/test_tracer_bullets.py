@@ -8,8 +8,9 @@ Not in depth tests of functionality.
 import pytest
 from cards import Card
 
+pytestmark = pytest.mark.smoke
 
-@pytest.mark.smoke
+
 def test_add(db_empty):
     # GIVEN an empty database
     db = db_empty
@@ -24,7 +25,6 @@ def test_add(db_empty):
     assert new_card == all_cards[0]
 
 
-@pytest.mark.smoke
 def test_get(db_non_empty):
     # GIVEN a card we know is in the db
     db = db_non_empty
@@ -40,7 +40,6 @@ def test_get(db_non_empty):
     assert a_card.id == retrieved_card.id
 
 
-@pytest.mark.smoke
 def test_list(db_empty):
     # GIVEN a db with known contents of 2 cards
     db = db_empty
@@ -53,7 +52,6 @@ def test_list(db_empty):
     assert expected == all_cards
 
 
-@pytest.mark.smoke
 def test_count(db_empty):
     # GIVEN a db with 2 cards
     db = db_empty
@@ -65,7 +63,6 @@ def test_count(db_empty):
     assert 2 == count
 
 
-@pytest.mark.smoke
 def test_update(db_non_empty):
     # GIVEN a card known to be in the db
     db = db_non_empty
@@ -82,7 +79,6 @@ def test_update(db_non_empty):
     assert expected == updated_card
 
 
-@pytest.mark.smoke
 def test_delete(db_empty):
     # GIVEN a db with 2 items
     db = db_empty
@@ -98,7 +94,6 @@ def test_delete(db_empty):
     assert expected == all_cards
 
 
-@pytest.mark.smoke
 def test_delete_all(db_non_empty):
     # GIVEN a non empty db
     db = db_non_empty

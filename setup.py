@@ -17,8 +17,7 @@ REQUIRES_PYTHON = '>=3.6.0'
 
 REQUIRED = ['click', 'tabulate',  # for CLI
             'tinydb',             # for DB
-            # built in dataclass for Python 3.7 (instead of attrs)
-            "attrs; python_version<'3.7'",  # cli <-> db data type
+            "dataclasses; python_version<'3.7'",  # cli <-> db data type
             ]
 
 # The rest you shouldn't have to touch too much :)
