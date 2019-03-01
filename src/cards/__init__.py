@@ -2,9 +2,6 @@
 
 """Top-level package for cards."""
 
-__version__ = '0.1.12'
+__version__ = '0.2.1'
 
-from .cardsdb import (  # noqa: F401
-    Card,
-    CardsDB
-)
+from .api import *  # noqa

@@ -3,9 +3,6 @@
 Tests using cards CLI (command line interface).
 """
 
-import pytest
-from cards import Card
-
 
 def test_add(db_empty, cards_cli, cards_cli_list_items):
     # GIVEN an empty database

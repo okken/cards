@@ -26,14 +26,16 @@ def cards_cli(ctx):
               help='set the card owner')
 def add(summary, owner):
     """Add a card to db."""
-    cards_db().add(cards.Card(summary, owner))
+    set_cards_db_path()
+    cards.add_card(cards.Card(summary, owner))
 
 
 @cards_cli.command(help="delete a card")
 @click.argument('card_id', type=int)
 def delete(card_id):
     """Remove card in db with given id."""
-    cards_db().delete(card_id)
+    set_cards_db_path()
+    cards.delete_card(card_id)
 
 
 @cards_cli.command(name="list", help="list cards")
@@ -51,7 +53,8 @@ def list_cards(noowner, owner, done, format):
     """
     List cards in db.
     """
-    the_cards = cards_db().list_cards(noowner, owner, done)
+    set_cards_db_path()
+    the_cards = cards.list_cards(noowner, owner, done)
 
     #  json is a special case
     if format == 'json':
@@ -94,7 +97,8 @@ def list_cards(noowner, owner, done, format):
               help='change the card done state (True or False)')
 def update(card_id, owner, summary, done):
     """Modify a card in db with given id with new info."""
-    cards_db().update(card_id, cards.Card(summary, owner, done))
+    set_cards_db_path()
+    cards.update_card(card_id, cards.Card(summary, owner, done))
 
 
 @cards_cli.command(help="list count")
@@ -107,10 +111,11 @@ def update(card_id, owner, summary, done):
               help='count cards with given done state')
 def count(noowner, owner, done):
     """Return number of cards in db."""
-    print(cards_db().count(noowner, owner, done))
+    set_cards_db_path()
+    print(cards.count(noowner, owner, done))
 
 
-def cards_db():
+def set_cards_db_path():
     # just put it in users home dir for now
     db_path = pathlib.Path().home() / '.cards_db.json'
-    return cards.CardsDB(db_path)
+    cards.set_db_path(db_path)
