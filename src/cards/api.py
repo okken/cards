@@ -5,7 +5,7 @@ from typing import List
 from dataclasses import dataclass, field, asdict
 
 
-__all__ = ["Card", "set_db_path", "add_card", "get_card",
+__all__ = ["Card", "set_db_path", "get_db_path", "add_card", "get_card",
            "list_cards", "count", "update_card", "delete_card",
            "delete_all"]
 
@@ -26,13 +26,21 @@ class Card:
 
 
 _db = None
+_db_path = None
 
 
 def set_db_path(db_path=None):
     global _db
+    global _db_path
     if db_path is None:
-        db_path = pathlib.Path().home() / '.cards_db.json'
-    _db = tinydb.TinyDB(db_path)
+        _db_path = pathlib.Path().home() / '.cards_db.json'
+    else:
+        _db_path = db_path
+    _db = tinydb.TinyDB(_db_path)
+
+
+def get_db_path():
+    return _db_path
 
 
 def add_card(card: Card) -> int:
