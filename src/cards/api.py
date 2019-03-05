@@ -55,9 +55,17 @@ def get_card(card_id: int) -> Card:
     return Card.from_dict(_db.get(doc_id=card_id))
 
 
-def list_cards(noowner=None, owner=None, done=None) -> List[Card]:
+def list_cards(filter=None) -> List[Card]:
     """Return a list of all cards."""
     q = tinydb.Query()
+    if filter:
+        noowner = filter.get('noowner', None)
+        owner = filter.get('owner', None)
+        done = filter.get('done', None)
+    else:
+        noowner = None
+        owner = None
+        done = None
     if noowner and owner:
         results = _db.search(
             (q.owner == owner) |
@@ -83,7 +91,8 @@ def list_cards(noowner=None, owner=None, done=None) -> List[Card]:
 
 def count(noowner=None, owner=None, done=None) -> int:
     """Return the number of cards in db."""
-    return len(list_cards(noowner, owner, done))
+    filter = {'noowner': noowner, 'owner': owner, 'done': done}
+    return len(list_cards(filter=filter))
 
 
 def update_card(card_id: int, card_mods: Card) -> None:

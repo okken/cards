@@ -7,7 +7,6 @@ This file contains tests related to design changes.
 import json
 from textwrap import dedent
 
-
 expected_output_default = """\
   ID  owner    done    summary
 ----  -------  ------  -----------

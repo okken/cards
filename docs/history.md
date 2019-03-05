@@ -1,6 +1,10 @@
 History
 =======
 
+0.2.1 (2019-02-28)
+------------------
+- rewrote API, tests
+
 0.1.12 (2018-04-26)
 ------------------
 - list now supports --format and accepts all formats that the tabulate package

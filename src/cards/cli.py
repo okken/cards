@@ -1,4 +1,11 @@
 """Command Line Interface (CLI) for cards project."""
+# todo: refactor: move noowner/owner/done into a filter param for
+#       various methods, to get ready for more attributes
+# todo: add priority
+# todo: add due dates
+# todo: add tags
+# todo: add history
+# todo: list only columns with contents
 
 import os
 import click
@@ -54,7 +61,8 @@ def list_cards(noowner, owner, done, format):
     List cards in db.
     """
     set_cards_db_path()
-    the_cards = cards.list_cards(noowner, owner, done)
+    filter = {'noowner': noowner, 'owner': owner, 'done': done}
+    the_cards = cards.list_cards(filter=filter)
 
     #  json is a special case
     if format == 'json':

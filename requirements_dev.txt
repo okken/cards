@@ -1,5 +1,2 @@
--e .
 pytest
-coverage
 tox
-flake8
