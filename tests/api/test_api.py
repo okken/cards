@@ -52,6 +52,23 @@ def test_list(db_empty):
     assert all_cards == some_cards
 
 
+def test_list_filter_by_priority(db_empty):
+    some_cards = [Card(summary='one', priority=2),
+                  Card(summary='two'),
+                  Card(summary='three', priority=1), ]
+    for c in some_cards:
+        cards.add_card(c)
+
+    one_and_above = cards.list_cards(filter={'priority': 1})
+    two_and_above = cards.list_cards(filter={'priority': 2})
+    one, two, three = some_cards
+    assert three in one_and_above
+
+    assert one in two_and_above
+    assert three in two_and_above
+    assert two not in two_and_above
+
+
 def test_count(db_empty):
     some_cards = [Card(summary='one'),
                   Card(summary='two')]

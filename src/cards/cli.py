@@ -50,18 +50,22 @@ def delete(card_id):
               help='filter on the card without owners')
 @click.option('-o', '--owner', default=None,
               help='filter on the card owner')
+@click.option('-p', '--priority', default=None,
+              type=int,
+              help='filter on this priority and above')
 @click.option('-d', '--done', default=None,
               type=bool,
               help='filter on cards with given done state')
 @click.option('-f', '--format', default=DEFAULT_TABLEFORMAT,
               type=str,
               help='table formatting option, eg. "grid", "simple", "html"')
-def list_cards(noowner, owner, done, format):
+def list_cards(noowner, owner, priority, done, format):
     """
     List cards in db.
     """
     set_cards_db_path()
-    filter = {'noowner': noowner, 'owner': owner, 'done': done}
+    filter = {'noowner': noowner, 'owner': owner,
+              'priority': priority, 'done': done}
     the_cards = cards.list_cards(filter=filter)
 
     #  json is a special case
@@ -78,7 +82,7 @@ def list_cards(noowner, owner, done, format):
         for t in the_cards:
             done = 'x' if t.done else 'o'
             owner = 'unassigned' if t.owner is None else t.owner
-            line = f'{t.id} {owner} {done} {t.summary}'
+            line = f'{t.id} {owner} {t.priority} {done} {t.summary}'
             print(line)
         return
 
@@ -87,10 +91,10 @@ def list_cards(noowner, owner, done, format):
     for t in the_cards:
         done = ' x ' if t.done else ''
         owner = '' if t.owner is None else t.owner
-        items.append((t.id, owner, done, t.summary))
+        items.append((t.id, owner, t.priority, done, t.summary))
 
     print(tabulate(items,
-                   headers=('ID', 'owner', 'done', 'summary'),
+                   headers=('ID', 'owner', 'priority', 'done', 'summary'),
                    tablefmt=format))
 
 
@@ -98,15 +102,18 @@ def list_cards(noowner, owner, done, format):
 @click.argument('card_id', type=int)
 @click.option('-o', '--owner', default=None,
               help='change the card owner')
+@click.option('-p', '--priority', default=None,
+              type=int,
+              help='change the card priority')
 @click.option('-s', '--summary', default=None,
               help='change the card summary')
 @click.option('-d', '--done', default=None,
               type=bool,
               help='change the card done state (True or False)')
-def update(card_id, owner, summary, done):
+def update(card_id, owner, priority, summary, done):
     """Modify a card in db with given id with new info."""
     set_cards_db_path()
-    cards.update_card(card_id, cards.Card(summary, owner, done))
+    cards.update_card(card_id, cards.Card(summary, owner, priority, done))
 
 
 @cards_cli.command(help="list count")
@@ -114,13 +121,16 @@ def update(card_id, owner, summary, done):
               help='count cards without owners')
 @click.option('-o', '--owner', default=None,
               help='count cards with given owner')
+@click.option('-p', '--priority', default=None,
+              type=int,
+              help='count cards with given priority and above')
 @click.option('-d', '--done', default=None,
               type=bool,
               help='count cards with given done state')
-def count(noowner, owner, done):
+def count(noowner, owner, priority, done):
     """Return number of cards in db."""
     set_cards_db_path()
-    print(cards.count(noowner, owner, done))
+    print(cards.count(noowner, owner, priority, done))
 
 
 def set_cards_db_path():

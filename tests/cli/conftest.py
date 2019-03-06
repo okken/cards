@@ -18,11 +18,6 @@ def db_empty(tmpdir, monkeypatch):
 
 
 @pytest.fixture()
-def runner():
-    return click.testing.CliRunner()
-
-
-@pytest.fixture()
 def cards_cli():
     runner = click.testing.CliRunner()
 
@@ -40,7 +35,7 @@ def db_non_empty(db_empty, cards_cli):
     cards_cli('add "third item"')
 
 
-Item = namedtuple('Item', ['id', 'owner', 'done', 'summary'])
+Item = namedtuple('Item', ['id', 'owner', 'priority', 'done', 'summary'])
 
 
 def items_from_output(output):
@@ -69,9 +64,6 @@ def cards_cli_list_items():
         if 'list' in input_list:
             input_list.append('--format=jira')
         output = runner.invoke(cards.cli.cards_cli, input_list).output.rstrip()
-        if 'list' in input_list:
-            return items_from_output(output)
-        else:
-            return output
+        return items_from_output(output)
 
     return _invoke_cards
