@@ -2,13 +2,9 @@ cards
 =====
 
 [![image](https://img.shields.io/pypi/v/cards.svg)](https://pypi.python.org/pypi/cards)
-
 [![image](https://img.shields.io/travis/okken/cards.svg)](https://travis-ci.org/okken/cards)
-
 [![image](https://ci.appveyor.com/api/projects/status/hk18x9ovqv3d7kpw?svg=true)](https://ci.appveyor.com/project/okken/cards)
-
 [![Documentation Status](https://readthedocs.org/projects/cards-project/badge/?version=latest)](https://cards-project.readthedocs.io/en/latest/?badge=latest)
-
 [![image](https://codecov.io/gh/okken/cards/branch/master/graph/badge.svg)](https://codecov.io/gh/okken/cards)
 
 Project task tracking / todo list (in progress)
