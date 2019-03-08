@@ -1,37 +1,16 @@
 # !/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import io
-import os
+from io import open
+from os import path
 import re
 
 from setuptools import find_packages, setup
 
-# Package meta-data.
-NAME = 'cards'
-DESCRIPTION = 'Project task tracking / todo list.'
-URL = 'https://github.com/okken/cards'
-EMAIL = 'brian@pythontesting.net'
-AUTHOR = 'Brian Okken'
-REQUIRES_PYTHON = '>=3.6.0'
-
-REQUIRED = ['click', 'tabulate',  # for CLI
-            'tinydb',             # for DB
-            "dataclasses; python_version<'3.7'",  # cli <-> db data type
-            ]
-
-# The rest you shouldn't have to touch too much :)
-# ------------------------------------------------
-
-here = os.path.abspath(os.path.dirname(__file__))
-
-# Import the README and use it as the long-description.
-with io.open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
-    long_description = '\n' + f.read()
-
 
 def read(*parts):
-    with io.open(os.path.join(here, *parts), 'r') as fp:
+    this_directory = path.abspath(path.dirname(__file__))
+    with open(path.join(this_directory, *parts), 'r', encoding='utf-8') as fp:
         return fp.read()
 
 
@@ -45,20 +24,24 @@ def find_version(*file_paths):
 
 
 setup(
-    name=NAME,
+    name="cards",
     version=find_version('src', 'cards', '__init__.py'),
-    description=DESCRIPTION,
-    long_description=long_description,
-    author=AUTHOR,
-    author_email=EMAIL,
-    python_requires=REQUIRES_PYTHON,
-    url=URL,
+    description='Project task tracking / todo list.',
+    long_description=read('README.md'),
+    long_description_content_type='text/markdown',
+    author='Brian Okken',
+    author_email='brian@pythontesting.net',
+    python_requires='>=3.6.0',
+    url='https://github.com/okken/pytest-md.git',
     packages=find_packages(where="src"),
     package_dir={"": "src"},
     entry_points={
         'console_scripts': ['cards=cards.cli:cards_cli'],
     },
-    install_requires=REQUIRED,
+    install_requires=['click',     # for CLI
+                      'tabulate',  # for CLI
+                      'tinydb',    # for DB
+                      "dataclasses; python_version<'3.7'"],
     include_package_data=True,
     license='MIT',
     classifiers=[
@@ -67,6 +50,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Programming Language :: Python :: Implementation :: CPython',
     ],
 )
