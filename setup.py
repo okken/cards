@@ -30,14 +30,11 @@ setup(
     long_description=read('README.md'),
     long_description_content_type='text/markdown',
     author='Brian Okken',
-    author_email='brian@pythontesting.net',
     python_requires='>=3.6.0',
     url='https://github.com/okken/pytest-md.git',
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    entry_points={
-        'console_scripts': ['cards=cards.cli:cards_cli'],
-    },
+    entry_points={'console_scripts': ['cards=cards.cli:cards_cli']},
     install_requires=['click',     # for CLI
                       'tabulate',  # for CLI
                       'tinydb',    # for DB
