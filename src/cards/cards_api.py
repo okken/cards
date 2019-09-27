@@ -14,7 +14,6 @@ __all__ = ["Card", "set_db_path", "get_db_path", "add_card", "get_card",
 class Card:
     summary: str = None
     owner: str = None
-    priority: int = None
     done: bool = None
     id: int = field(default=None, compare=False)
 
@@ -62,12 +61,10 @@ def list_cards(filter=None) -> List[Card]:
     if filter:
         noowner = filter.get('noowner', None)
         owner = filter.get('owner', None)
-        priority = filter.get('priority', None)
         done = filter.get('done', None)
     else:
         noowner = None
         owner = None
-        priority = None
         done = None
     if noowner and owner:
         results = _db.search(
@@ -78,9 +75,6 @@ def list_cards(filter=None) -> List[Card]:
         results = _db.search((q.owner == None) |  (q.owner == '')) # noqa
     elif owner:
         results = _db.search(q.owner == owner)
-    elif priority:
-        results = _db.search((q.priority != None) &   # noqa
-                             (q.priority <= priority))
     else:
         results = _db
 
@@ -95,10 +89,9 @@ def list_cards(filter=None) -> List[Card]:
         return [Card.from_dict(t) for t in results if not t['done']]
 
 
-def count(noowner=None, owner=None, priority=None, done=None) -> int:
+def count(noowner=None, owner=None, done=None) -> int:
     """Return the number of cards in db."""
-    filter = {'noowner': noowner, 'owner': owner,
-              'priority': priority, 'done': done}
+    filter = {'noowner': noowner, 'owner': owner, 'done': done}
     return len(list_cards(filter=filter))
 
 
