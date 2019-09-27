@@ -51,13 +51,3 @@ def test_replace():
     c2 = Card('foo', 'someone else', False)
     c3 = replace(c2, owner='brian', done=True)
     assert c1 == c3
-
-
-
-
-
-
-
-
-
-
