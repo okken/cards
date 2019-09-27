@@ -1,112 +1,40 @@
-import pathlib
-import tinydb
-from typing import List
-
-from dataclasses import dataclass, field, asdict
+from typing import List, Union
+from .cards_data import Card, Filter
+from . import cards_db
 
 
-__all__ = ["Card", "set_db_path", "get_db_path", "add_card", "get_card",
-           "list_cards", "count", "update_card", "delete_card",
+__all__ = ["Card", "add_card", "get_card",
+           "list_cards", "finish", "count", "update_card", "delete_card",
            "delete_all"]
 
 
-@dataclass
-class Card:
-    summary: str = None
-    owner: str = None
-    done: bool = None
-    id: int = field(default=None, compare=False)
-
-    @classmethod
-    def from_dict(cls, d):
-        return Card(**d)
-
-    def to_dict(self):
-        return asdict(self)
-
-
-_db = None
-_db_path = None
-
-
-def set_db_path(db_path=None):
-    global _db
-    global _db_path
-    if db_path is None:
-        _db_path = pathlib.Path().home() / '.cards_db.json'
-    else:
-        _db_path = db_path
-    _db = tinydb.TinyDB(_db_path)
-
-
-def get_db_path():
-    return _db_path
-
-
 def add_card(card: Card) -> int:
-    """Add a card, return the id of card."""
-    card.id = _db.insert(card.to_dict())
-    _db.update(card.to_dict(), doc_ids=[card.id])
-    return card.id
+    return cards_db.create(card)
 
 
 def get_card(card_id: int) -> Card:
-    """Return a card with a matching id."""
-    return Card.from_dict(_db.get(doc_id=card_id))
+    return cards_db.read(card_id)
 
 
-def list_cards(filter=None) -> List[Card]:
-    """Return a list of all cards."""
-    q = tinydb.Query()
-    if filter:
-        noowner = filter.get('noowner', None)
-        owner = filter.get('owner', None)
-        done = filter.get('done', None)
-    else:
-        noowner = None
-        owner = None
-        done = None
-    if noowner and owner:
-        results = _db.search(
-            (q.owner == owner) |
-            (q.owner == None) |  # noqa : "is None" doesn't work for TinyDb
-            (q.owner == ''))
-    elif noowner or owner == '':
-        results = _db.search((q.owner == None) |  (q.owner == '')) # noqa
-    elif owner:
-        results = _db.search(q.owner == owner)
-    else:
-        results = _db
-
-    if done is None:
-        # return all cards
-        return [Card.from_dict(t) for t in results]
-    elif done:
-        # only done cards
-        return [Card.from_dict(t) for t in results if t['done']]
-    else:
-        # only not done cards
-        return [Card.from_dict(t) for t in results if not t['done']]
+def list_cards(filter: Union[Filter, None] = None) -> List[Card]:
+    return cards_db.read_many(filter)
 
 
-def count(noowner=None, owner=None, done=None) -> int:
-    """Return the number of cards in db."""
-    filter = {'noowner': noowner, 'owner': owner, 'done': done}
+def count(filter: Union[Filter, None] = None) -> int:
     return len(list_cards(filter=filter))
 
 
+def finish(card_id: int):
+    cards_db.update(card_id, Card(done=True))
+
+
 def update_card(card_id: int, card_mods: Card) -> None:
-    """Update a card with modifications."""
-    d = card_mods.to_dict()
-    changes = {k: v for k, v in d.items() if v is not None}
-    _db.update(changes, doc_ids=[card_id])
+    cards_db.update(card_id, card_mods)
 
 
 def delete_card(card_id: int) -> None:
-    """Remove a card from db with given card_id."""
-    _db.remove(doc_ids=[card_id])
+    cards_db.delete(card_id)
 
 
 def delete_all() -> None:
-    """Remove all tasks from db."""
-    _db.purge()
+    cards_db.delete_all()

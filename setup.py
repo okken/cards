@@ -34,7 +34,7 @@ setup(
     url='https://github.com/okken/pytest-md.git',
     packages=find_packages(where="src"),
     package_dir={"": "src"},
-    entry_points={'console_scripts': ['cards=cards.cli:cards_cli']},
+    entry_points={'console_scripts': ['cards=cards.cards_cli:cards_cli']},
     install_requires=['click',     # for CLI
                       'tabulate',  # for CLI
                       'tinydb',    # for DB

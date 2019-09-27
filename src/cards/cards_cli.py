@@ -5,6 +5,8 @@ import click
 import cards
 import json
 from tabulate import tabulate
+from dataclasses import asdict
+from contextlib import contextmanager
 
 DEFAULT_TABLEFORMAT = os.environ.get('CARDSTABLEFORMAT', 'simple')
 
@@ -25,17 +27,17 @@ def cards_cli(ctx):
               help='set the card owner')
 def add(summary, owner):
     """Add a card to db."""
-    cards.set_db_path()
-    summary = ' '.join(summary)
-    cards.add_card(cards.Card(summary, owner))
+    with cards_db_connection():
+        summary = ' '.join(summary)
+        cards.add_card(cards.Card(summary, owner))
 
 
 @cards_cli.command(help="delete a card")
 @click.argument('card_id', type=int)
 def delete(card_id):
     """Remove card in db with given id."""
-    cards.set_db_path()
-    cards.delete_card(card_id)
+    with cards_db_connection():
+        cards.delete_card(card_id)
 
 
 @cards_cli.command(name="list", help="list cards")
@@ -53,46 +55,46 @@ def list_cards(noowner, owner, done, format):
     """
     List cards in db.
     """
-    cards.set_db_path()
-    filter = {'noowner': noowner, 'owner': owner, 'done': done}
-    the_cards = cards.list_cards(filter=filter)
+    with cards_db_connection():
+        filter = cards.Filter(owner, noowner, done)
+        the_cards = cards.list_cards(filter=filter)
 
-    #  json is a special case
-    if format == 'json':
-        items = [c.to_dict() for c in the_cards]
-        print(json.dumps({"cards": items}, sort_keys=True, indent=4))
-        return
+        #  json is a special case
+        if format == 'json':
+            items = [asdict(c) for c in the_cards]
+            print(json.dumps({"cards": items}, sort_keys=True, indent=4))
+            return
 
-    # who's going to remember 'pipe' for markdown?
-    if format == 'markdown':
-        format = 'pipe'
+        # who's going to remember 'pipe' for markdown?
+        if format == 'markdown':
+            format = 'pipe'
 
-    if format == 'packed':
+        if format == 'packed':
+            for t in the_cards:
+                done = 'x' if t.done else 'o'
+                owner = 'unassigned' if t.owner is None else t.owner
+                line = f'{t.id} {owner} {done} {t.summary}'
+                print(line)
+            return
+
+        # all formats except json/none use tabulate
+        items = []
         for t in the_cards:
-            done = 'x' if t.done else 'o'
-            owner = 'unassigned' if t.owner is None else t.owner
-            line = f'{t.id} {owner} {done} {t.summary}'
-            print(line)
-        return
+            done = ' x ' if t.done else ''
+            owner = '' if t.owner is None else t.owner
+            items.append((t.id, owner, done, t.summary))
 
-    # all formats except json/none use tabulate
-    items = []
-    for t in the_cards:
-        done = ' x ' if t.done else ''
-        owner = '' if t.owner is None else t.owner
-        items.append((t.id, owner, done, t.summary))
-
-    print(tabulate(items,
-                   headers=('ID', 'owner', 'done', 'summary'),
-                   tablefmt=format))
+        print(tabulate(items,
+                       headers=('ID', 'owner', 'done', 'summary'),
+                       tablefmt=format))
 
 
 @cards_cli.command(help="mark card as done")
 @click.argument('card_id', type=int)
 def finish(card_id):
     """Modify a card in db with given id with new info."""
-    cards.set_db_path()
-    cards.update_card(card_id, cards.Card(done=True))
+    with cards_db_connection():
+        cards.finish(card_id)
 
 
 @cards_cli.command(help="update card")
@@ -106,8 +108,8 @@ def finish(card_id):
               help='change the card done state (True or False)')
 def update(card_id, owner, summary, done):
     """Modify a card in db with given id with new info."""
-    cards.set_db_path()
-    cards.update_card(card_id, cards.Card(summary, owner, done))
+    with cards_db_connection():
+        cards.update_card(card_id, cards.Card(summary, owner, done))
 
 
 
@@ -121,6 +123,12 @@ def update(card_id, owner, summary, done):
               help='count cards with given done state')
 def count(noowner, owner, done):
     """Return number of cards in db."""
-    cards.set_db_path()
-    print(cards.count(noowner, owner, done))
+    with cards_db_connection():
+        filter = cards.Filter(owner, noowner, done)
+        print(cards.count(filter))
 
+@contextmanager
+def cards_db_connection():
+    cards.connect()
+    yield
+    cards.disconnect()
