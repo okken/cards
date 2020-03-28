@@ -41,14 +41,16 @@ docs: ## generate HTML documentation
 servedocs: docs ## compile the docs watching for changes
 	mkdocs serve
 
-VERSION := v$(shell python setup.py --version)
+# This clearly can't work with flit
+#
+#VERSION := v$(shell python setup.py --version)
 
-release: clean ## package and upload a release
-	flit build
-	twine upload dist/*
-	@echo "pushing tags"
-	git tag $(VERSION)
-	git push --tags
+#release: clean ## package and upload a release
+#	flit build
+#	twine upload dist/*
+#	@echo "pushing tags"
+#	git tag $(VERSION)
+#	git push --tags
 
 dist: clean ## builds source and wheel package
 	flit build
