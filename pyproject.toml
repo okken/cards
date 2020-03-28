@@ -1,0 +1,25 @@
+[build-system]
+requires = ["flit_core >=2,<3"]
+build-backend = "flit_core.buildapi"
+
+[tool.flit.metadata]
+module = "cards"
+author = "Brian Okken"
+home-page = "https://github.com/okken/cards"
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: Implementation :: CPython",
+]
+requires = ["tinydb", "click", "tabulate"]
+requires-python=">=3.7"
+description-file="README.md"
+
+[tool.flit.metadata.requires-extra]
+test = [ "pytest", "pytest-cov", ]
+
+[tool.flit.scripts]
+cards = "cards:cards_cli"
