@@ -1,11 +1,15 @@
+Done
+----
+* 3.7, 3.8, 3.9
+* flit
+* clean up Makefile
+* clean up tox.ini
+
+
 Really short term TODO items
 ----------------------------
 
-* 3.8+ only, done
-* flit
 * typer
-* clean up Makefile
-* clean up tox.ini
 * validate all docs
 
 Short Term TODO items
