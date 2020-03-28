@@ -1,9 +1,10 @@
 site_name: Cards Project
-pages:
+nav:
     - Home: index.md
     - Installation: installation.md
     - Usage: usage.md
     - Contributing: contributing.md
+    - TODO: TODO.md
     - Version History: history.md
 
 theme: readthedocs
