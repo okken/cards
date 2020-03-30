@@ -22,8 +22,7 @@ def version():
 @app.command()
 def add(
     summary: List[str],
-    owner: str = typer.Option(None, "-o", "--owner",
-                              help="set the card owner"),
+    owner: str = typer.Option(None, "-o", "--owner", help="set the card owner"),
 ):
     """Add a card to db."""
     set_cards_db_path()
@@ -41,18 +40,14 @@ def delete(card_id: int):
 @app.command("list")
 def list_cards(
     noowner: bool = typer.Option(
-        None, "-n", "--noowner", "--no-owner",
-        help="list cards without owners"
+        None, "-n", "--noowner", "--no-owner", help="list cards without owners"
     ),
-    owner: str = typer.Option(None, "-o", "--owner",
-                              help="filter on the cards owner"),
+    owner: str = typer.Option(None, "-o", "--owner", help="filter on the cards owner"),
     priority: int = typer.Option(
-        None, "-p", "--priority",
-        help="fliter on this priority and above"
+        None, "-p", "--priority", help="fliter on this priority and above"
     ),
     done: bool = typer.Option(
-        None, "-d", "--done",
-        help="filter on cards with given done state"
+        None, "-d", "--done", help="filter on cards with given done state"
     ),
     format: str = typer.Option(
         DEFAULT_TABLEFORMAT,
@@ -65,8 +60,7 @@ def list_cards(
     List cards in db.
     """
     set_cards_db_path()
-    filter = {"noowner": noowner, "owner": owner,
-              "priority": priority, "done": done}
+    filter = {"noowner": noowner, "owner": owner, "priority": priority, "done": done}
     the_cards = cards.list_cards(filter=filter)
 
     #  json is a special case
@@ -106,14 +100,14 @@ def list_cards(
 @app.command()
 def update(
     card_id: int,
-    owner: str = typer.Option(None, "-o", "--owner",
-                              help="change the card owner"),
-    priority: int = typer.Option(None, "-p", "--priority",
-                                 help="change the card priority"),
-    summary: List[str] = typer.Option(None, "-s", "--summary",
-                                      help="change the card summary"),
-    done: bool = typer.Option(None, "-d", "--done",
-                              help="change the card done state"),
+    owner: str = typer.Option(None, "-o", "--owner", help="change the card owner"),
+    priority: int = typer.Option(
+        None, "-p", "--priority", help="change the card priority"
+    ),
+    summary: List[str] = typer.Option(
+        None, "-s", "--summary", help="change the card summary"
+    ),
+    done: bool = typer.Option(None, "-d", "--done", help="change the card done state"),
 ):
     """Modify a card in db with given id with new info."""
     set_cards_db_path()
@@ -124,8 +118,7 @@ def update(
 @app.command()
 def count(
     noowner: bool = typer.Option(
-        None, "-n", "--noowner", "--no-owner",
-        help="count cards without owners"
+        None, "-n", "--noowner", "--no-owner", help="count cards without owners"
     ),
     owner: str = typer.Option(
         None, "-o", "--owner", help="count cards with given owner"
@@ -134,13 +127,13 @@ def count(
         None, "-p", "--priority", help="count cards with given priority"
     ),
     done: bool = typer.Option(
-        None, "-d", "--done",
-        help="count cards with given done state (True or False)"
+        None, "-d", "--done", help="count cards with given done state (True or False)"
     ),
 ):
     """Return number of cards in db."""
     set_cards_db_path()
     print(cards.count(noowner, owner, priority, done))
+
 
 @app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
@@ -148,11 +141,14 @@ def main(ctx: typer.Context):
     Call list_cards of nothing else
     """
     if ctx.invoked_subcommand is None:
-        list_cards(noowner=None,
-                   owner=None,
-                   priority=None,
-                   done=None,
-                   format=DEFAULT_TABLEFORMAT)
+        list_cards(
+            noowner=None,
+            owner=None,
+            priority=None,
+            done=None,
+            format=DEFAULT_TABLEFORMAT,
+        )
+
 
 def set_cards_db_path():
     # just put it in users home dir for now
@@ -163,4 +159,4 @@ def set_cards_db_path():
 # useful for debugging during development
 # doesn't need test coverage
 if __name__ == "__main__":
-    app()                   # pragma: no cover
+    app()  # pragma: no cover
