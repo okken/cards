@@ -1,6 +1,14 @@
 History
 =======
 
+0.2.6 (2020-04-30)
+------------------
+- setuptools -> flit
+- click -> typer
+- pre-commit
+- black
+- flake8
+
 0.2.4 (2019-03-08)
 ------------------
 - README.rst -> README.md

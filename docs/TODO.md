@@ -5,21 +5,17 @@ Done
 * clean up Makefile
 * clean up tox.ini
 * typer
+* black
+* pre-commit
 
 
 Really short term TODO items
 ----------------------------
 
+* clean up typer usage (maybe)
 * validate all docs
 * revisit all tests
 
-Short Term TODO items
----------------------
-
--   Remove presentation from most of the automated tests.
-    * It's a pain when the presentation changes.
--   add black
--   add pre-commit hooks with flake8 and black and testing
 
 Long Term TODO items
 --------------------

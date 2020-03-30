@@ -47,12 +47,10 @@ release: clean ## package and upload a release
 	pip install twine
 	flit build
 	flit install
-	@echo "---- the rest of this is not actually running ----"
-	@echo "twine upload dist/*"
+	twine upload dist/*
 	@echo "pushing tags"
-	@echo "git tag $(cards --version | sed 's/cards, version //')"
-	@echo "git push --tags"
-	@echo "---- the previous bit was not actually running ----"
+	git tag $(cards --version | sed 's/cards, version //')
+	git push --tags
 
 dist: clean ## builds source and wheel package
 	flit build
