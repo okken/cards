@@ -1,6 +1,6 @@
 import cards
-from cards import Card
 import pytest
+from cards import Card
 
 
 @pytest.fixture(scope="module", autouse=True)

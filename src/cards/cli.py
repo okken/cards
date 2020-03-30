@@ -1,12 +1,12 @@
 """Command Line Interface (CLI) for cards project."""
-
-import os
-import typer
-import cards
 import json
+import os
 import pathlib
-from tabulate import tabulate
 from typing import List
+
+import cards
+import typer
+from tabulate import tabulate
 
 DEFAULT_TABLEFORMAT = os.environ.get("CARDSTABLEFORMAT", "simple")
 
@@ -40,14 +40,14 @@ def delete(card_id: int):
 @app.command("list")
 def list_cards(
     noowner: bool = typer.Option(
-        None, "-n", "--noowner", "--no-owner", help="list cards without owners"
+        None, "-n", "--noowner", "--no-owner", help="list cards without owners",
     ),
     owner: str = typer.Option(None, "-o", "--owner", help="filter on the cards owner"),
     priority: int = typer.Option(
-        None, "-p", "--priority", help="fliter on this priority and above"
+        None, "-p", "--priority", help="fliter on this priority and above",
     ),
     done: bool = typer.Option(
-        None, "-d", "--done", help="filter on cards with given done state"
+        None, "-d", "--done", help="filter on cards with given done state",
     ),
     format: str = typer.Option(
         DEFAULT_TABLEFORMAT,
@@ -93,7 +93,7 @@ def list_cards(
             items,
             headers=("ID", "owner", "priority", "done", "summary"),
             tablefmt=format,
-        )
+        ),
     )
 
 
@@ -102,10 +102,10 @@ def update(
     card_id: int,
     owner: str = typer.Option(None, "-o", "--owner", help="change the card owner"),
     priority: int = typer.Option(
-        None, "-p", "--priority", help="change the card priority"
+        None, "-p", "--priority", help="change the card priority",
     ),
     summary: List[str] = typer.Option(
-        None, "-s", "--summary", help="change the card summary"
+        None, "-s", "--summary", help="change the card summary",
     ),
     done: bool = typer.Option(None, "-d", "--done", help="change the card done state"),
 ):
@@ -118,16 +118,16 @@ def update(
 @app.command()
 def count(
     noowner: bool = typer.Option(
-        None, "-n", "--noowner", "--no-owner", help="count cards without owners"
+        None, "-n", "--noowner", "--no-owner", help="count cards without owners",
     ),
     owner: str = typer.Option(
-        None, "-o", "--owner", help="count cards with given owner"
+        None, "-o", "--owner", help="count cards with given owner",
     ),
     priority: int = typer.Option(
-        None, "-p", "--priority", help="count cards with given priority"
+        None, "-p", "--priority", help="count cards with given priority",
     ),
     done: bool = typer.Option(
-        None, "-d", "--done", help="count cards with given done state (True or False)"
+        None, "-d", "--done", help="count cards with given done state (True or False)",
     ),
 ):
     """Return number of cards in db."""

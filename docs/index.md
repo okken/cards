@@ -57,6 +57,3 @@ Commands:
   list    list cards
   update  update card
 ```
-
-
-

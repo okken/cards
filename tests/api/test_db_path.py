@@ -1,5 +1,6 @@
-import cards
 import pathlib
+
+import cards
 
 
 def test_db_path_specified(tmp_path):

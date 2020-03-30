@@ -1,10 +1,11 @@
-from typer.testing import CliRunner
-import pytest
 import pathlib
-from cards.cli import app
 import shlex
 from collections import namedtuple
+
 import cards.cli
+import pytest
+from cards.cli import app
+from typer.testing import CliRunner
 
 
 @pytest.fixture()

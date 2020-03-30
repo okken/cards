@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 Tests using cards CLI (command line interface).
 """

@@ -38,4 +38,3 @@ Long Term TODO items
     to maintain?
 -   Keep it a reasonably simple project that is a good example of
     whatever the Python community generally agrees is ok practices.
-

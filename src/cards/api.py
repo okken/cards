@@ -1,8 +1,13 @@
+"""
+API for the cards project
+"""
 import pathlib
-import tinydb
+from dataclasses import asdict
+from dataclasses import dataclass
+from dataclasses import field
 from typing import List
 
-from dataclasses import dataclass, field, asdict
+import tinydb
 
 
 __all__ = [
@@ -82,7 +87,7 @@ def list_cards(filter=None) -> List[Card]:
         # #E711 comparison to None should be 'if cond is None:'
         # However, that doesn't work for tinydb
         results = _db.search(
-            (q.owner == owner) | (q.owner == None) | (q.owner == "")
+            (q.owner == owner) | (q.owner == None) | (q.owner == ""),
         )  # noqa
     elif noowner or owner == "":
         results = _db.search((q.owner == None) | (q.owner == ""))  # noqa

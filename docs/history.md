@@ -80,5 +80,3 @@ formats.
 
 -   First release on PyPI. This is just from the cookie cutter template.
 -   There is no functionality available yet.
-
-

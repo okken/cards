@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
 """
 Tests using cards CLI (command line interface).
 This file contains tests related to design changes.
 """
-
 import json
 from textwrap import dedent
 
@@ -52,7 +50,7 @@ def test_list_json(db_non_empty, cards_cli):
                 "priority": None,
                 "summary": "third item",
             },
-        ]
+        ],
     }
     output_json_str = cards_cli("list --format=json")
     output_json = json.loads(output_json_str)
@@ -67,7 +65,7 @@ def test_list_markdown(db_non_empty, cards_cli):
     |-----:|:--------|:-----------|:-------|:------------|
     |    1 |         |            |        | first item  |
     |    2 |         |            |        | second item |
-    |    3 |         |            |        | third item  |"""
+    |    3 |         |            |        | third item  |""",
     )
     output = cards_cli("list -f markdown")
     assert expected_output == output
@@ -82,7 +80,7 @@ def test_list_packed(db_non_empty, cards_cli):
         """\
     1 unassigned None o first item
     2 unassigned None o second item
-    3 unassigned None o third item"""
+    3 unassigned None o third item""",
     )
     output = cards_cli("list -f packed")
     assert expected_output == output
@@ -100,7 +98,7 @@ def test_list_grid(db_non_empty, cards_cli):
     |    2 |         |            |        | second item |
     +------+---------+------------+--------+-------------+
     |    3 |         |            |        | third item  |
-    +------+---------+------------+--------+-------------+"""
+    +------+---------+------------+--------+-------------+""",
     )
     output = cards_cli("list -f grid")
     assert expected_output == output
