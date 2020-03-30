@@ -142,6 +142,17 @@ def count(
     set_cards_db_path()
     print(cards.count(noowner, owner, priority, done))
 
+@app.callback(invoke_without_command=True)
+def main(ctx: typer.Context):
+    """
+    Call list_cards of nothing else
+    """
+    if ctx.invoked_subcommand is None:
+        list_cards(noowner=None,
+                   owner=None,
+                   priority=None,
+                   done=None,
+                   format=DEFAULT_TABLEFORMAT)
 
 def set_cards_db_path():
     # just put it in users home dir for now
@@ -149,5 +160,7 @@ def set_cards_db_path():
     cards.set_db_path(db_path)
 
 
+# useful for debugging during development
+# doesn't need test coverage
 if __name__ == "__main__":
-    app()
+    app()                   # pragma: no cover

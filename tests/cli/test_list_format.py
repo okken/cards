@@ -22,12 +22,10 @@ def test_list_format(db_non_empty, cards_cli):
     assert expected_output_default == output
 
 
-# I don't know how to do this with typer yet.
-#
-# def test_cards_no_list_arg(db_non_empty, cards_cli):
-#     """Does `cards` behave just like `cards list`?"""
-#     output = cards_cli('')
-#     assert expected_output_default == output
+def test_cards_no_list_arg(db_non_empty, cards_cli):
+    """Does `cards` behave just like `cards list`?"""
+    output = cards_cli('')
+    assert expected_output_default == output
 
 
 def test_list_json(db_non_empty, cards_cli):

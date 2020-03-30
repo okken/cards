@@ -63,3 +63,12 @@ def test_delete(db_empty, cards_cli, cards_cli_list_items):
 
     # THEN the other card remains
     assert cards_cli('count') == '1'
+
+
+def test_version(cards_cli):
+    """
+    Should return 3 digits separated by a dot
+    """
+    version = cards_cli('version').split('.')
+    assert len(version) == 3
+    assert all([d.isdigit() for d in version])

@@ -39,18 +39,6 @@ def db_non_empty(db_empty, cards_cli):
 Item = namedtuple('Item', ['id', 'owner', 'priority', 'done', 'summary'])
 
 
-def items_from_output(output):
-    """
-    Turn a tabulate output into a tuple of headers and rows
-    assuming the output was formatted in the "jira" style
-    """
-    lines = output.split('\n')
-    values = [[item.strip()
-               for item in row.split('|')[1:-1]] for row in lines[1:]]
-    items = [Item(*v) for v in values]
-    return items
-
-
 @pytest.fixture()
 def cards_cli_list_items():
     '''
@@ -62,9 +50,14 @@ def cards_cli_list_items():
 
     def _invoke_cards(input_string):
         input_list = shlex.split(input_string)
-        if 'list' in input_list:
-            input_list.append('--format=jira')
+        input_list.append('--format=jira')  # produces easy to parse |'s
         output = runner.invoke(app, input_list).output.rstrip()
-        return items_from_output(output)
+        # Turn a tabulate output into a tuple of headers and rows
+        # assuming the output was formatted in the "jira" style
+        lines = output.split('\n')
+        values = [[item.strip()
+                   for item in row.split('|')[1:-1]] for row in lines[1:]]
+        items = [Item(*v) for v in values]
+        return items
 
     return _invoke_cards
