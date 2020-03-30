@@ -4,13 +4,14 @@ Done
 * flit
 * clean up Makefile
 * clean up tox.ini
+* typer
 
 
 Really short term TODO items
 ----------------------------
 
-* typer
 * validate all docs
+* revisit all tests
 
 Short Term TODO items
 ---------------------
@@ -23,7 +24,6 @@ Short Term TODO items
 Long Term TODO items
 --------------------
 
--   Split off the CLI to a separate package, maybe
 -   Create a REST API and multi-user capability so that multiple people
     can connect to one database.
 -   Create alternative front ends. For example:
