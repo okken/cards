@@ -1,9 +1,10 @@
-import click.testing
+from typer.testing import CliRunner
 import pytest
 import pathlib
-import cards.cli
+from cards.cli import app
 import shlex
 from collections import namedtuple
+import cards.cli
 
 
 @pytest.fixture()
@@ -19,11 +20,11 @@ def db_empty(tmpdir, monkeypatch):
 
 @pytest.fixture()
 def cards_cli():
-    runner = click.testing.CliRunner()
+    runner = CliRunner()
 
     def _invoke_cards(input_string):
         input_list = shlex.split(input_string)
-        return runner.invoke(cards.cli.cards_cli, input_list).output.rstrip()
+        return runner.invoke(app, input_list).output.rstrip()
 
     return _invoke_cards
 
@@ -57,13 +58,13 @@ def cards_cli_list_items():
     Returns detabulated items.
     '''
 
-    runner = click.testing.CliRunner()
+    runner = CliRunner()
 
     def _invoke_cards(input_string):
         input_list = shlex.split(input_string)
         if 'list' in input_list:
             input_list.append('--format=jira')
-        output = runner.invoke(cards.cli.cards_cli, input_list).output.rstrip()
+        output = runner.invoke(app, input_list).output.rstrip()
         return items_from_output(output)
 
     return _invoke_cards

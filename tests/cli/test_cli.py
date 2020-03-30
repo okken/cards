@@ -33,10 +33,10 @@ def test_list_filter(db_empty, cards_cli, cards_cli_list_items):
     items = cards_cli_list_items('list')
     for i in items:
         if i.summary in ('three', 'four'):
-            cards_cli(f'update {i.id} -d True')
+            cards_cli(f'update {i.id} -d')
 
-    # `cards --noowner -o okken -d True` should return two items
-    items = cards_cli_list_items('list --noowner -o okken -d True')
+    # `cards --noowner -o okken -d` should return two items
+    items = cards_cli_list_items('list --noowner -o okken -d')
     assert len(items) == 2
     for i in items:
         assert i.summary in ('three', 'four')

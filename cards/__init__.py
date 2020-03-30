@@ -5,4 +5,4 @@
 __version__ = '0.2.5'
 
 from .api import *  # noqa
-from .cli import cards_cli  # noqa
+from .cli import app  # noqa
