@@ -1,6 +1,14 @@
 History
 =======
 
+0.2.6 (2020-04-30)
+------------------
+- setuptools -> flit
+- click -> typer
+- pre-commit
+- black
+- flake8
+
 0.2.4 (2019-03-08)
 ------------------
 - README.rst -> README.md
@@ -80,5 +88,3 @@ formats.
 
 -   First release on PyPI. This is just from the cookie cutter template.
 -   There is no functionality available yet.
-
-

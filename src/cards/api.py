@@ -1,13 +1,27 @@
+"""
+API for the cards project
+"""
 import pathlib
-import tinydb
+from dataclasses import asdict
+from dataclasses import dataclass
+from dataclasses import field
 from typing import List
 
-from dataclasses import dataclass, field, asdict
+import tinydb
 
 
-__all__ = ["Card", "set_db_path", "get_db_path", "add_card", "get_card",
-           "list_cards", "count", "update_card", "delete_card",
-           "delete_all"]
+__all__ = [
+    "Card",
+    "set_db_path",
+    "get_db_path",
+    "add_card",
+    "get_card",
+    "list_cards",
+    "count",
+    "update_card",
+    "delete_card",
+    "delete_all",
+]
 
 
 @dataclass
@@ -34,7 +48,7 @@ def set_db_path(db_path=None):
     global _db
     global _db_path
     if db_path is None:
-        _db_path = pathlib.Path().home() / '.cards_db.json'
+        _db_path = pathlib.Path().home() / ".cards_db.json"
     else:
         _db_path = db_path
     _db = tinydb.TinyDB(_db_path)
@@ -60,27 +74,27 @@ def list_cards(filter=None) -> List[Card]:
     """Return a list of all cards."""
     q = tinydb.Query()
     if filter:
-        noowner = filter.get('noowner', None)
-        owner = filter.get('owner', None)
-        priority = filter.get('priority', None)
-        done = filter.get('done', None)
+        noowner = filter.get("noowner", None)
+        owner = filter.get("owner", None)
+        priority = filter.get("priority", None)
+        done = filter.get("done", None)
     else:
         noowner = None
         owner = None
         priority = None
         done = None
     if noowner and owner:
+        # #E711 comparison to None should be 'if cond is None:'
+        # However, that doesn't work for tinydb
         results = _db.search(
-            (q.owner == owner) |
-            (q.owner == None) |  # noqa : "is None" doesn't work for TinyDb
-            (q.owner == ''))
-    elif noowner or owner == '':
-        results = _db.search((q.owner == None) |  (q.owner == '')) # noqa
+            (q.owner == owner) | (q.owner == None) | (q.owner == ""),
+        )  # noqa
+    elif noowner or owner == "":
+        results = _db.search((q.owner == None) | (q.owner == ""))  # noqa
     elif owner:
         results = _db.search(q.owner == owner)
     elif priority:
-        results = _db.search((q.priority != None) &   # noqa
-                             (q.priority <= priority))
+        results = _db.search((q.priority != None) & (q.priority <= priority))  # noqa
     else:
         results = _db
 
@@ -89,16 +103,15 @@ def list_cards(filter=None) -> List[Card]:
         return [Card.from_dict(t) for t in results]
     elif done:
         # only done cards
-        return [Card.from_dict(t) for t in results if t['done']]
+        return [Card.from_dict(t) for t in results if t["done"]]
     else:
         # only not done cards
-        return [Card.from_dict(t) for t in results if not t['done']]
+        return [Card.from_dict(t) for t in results if not t["done"]]
 
 
 def count(noowner=None, owner=None, priority=None, done=None) -> int:
     """Return the number of cards in db."""
-    filter = {'noowner': noowner, 'owner': owner,
-              'priority': priority, 'done': done}
+    filter = {"noowner": noowner, "owner": owner, "priority": priority, "done": done}
     return len(list_cards(filter=filter))
 
 
