@@ -49,7 +49,7 @@ release: clean ## package and upload a release
 	flit install
 	twine upload dist/*
 	@echo "pushing tags"
-	git tag $(cards --version | sed 's/cards, version //')
+	git tag $(cards version)
 	git push --tags
 
 dist: clean ## builds source and wheel package
