@@ -5,6 +5,7 @@ build-backend = "flit_core.buildapi"
 [tool.flit.metadata]
 module = "cards"
 author = "Brian Okken"
+author-email = "brian+pypi@pythontest.com"
 home-page = "https://github.com/okken/cards"
 classifiers = [
     "License :: OSI Approved :: MIT License",
