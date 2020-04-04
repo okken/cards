@@ -26,10 +26,10 @@ clean-docs: ## remove mkdocs site
 	rm -fr site/
 
 lint: ## check style with flake8
-	python -m flake8 --show-source cards tests
+	tox -e flake8
 
 test: ## run tests quickly with the default Python
-	pytest
+	tox
 
 tox:  ## alias so "make tox" works
 	tox
@@ -41,10 +41,9 @@ docs: ## generate HTML documentation
 servedocs: docs ## compile the docs watching for changes
 	mkdocs serve
 
-VERSION := v$(shell python setup.py --version)
-
 release: clean ## package and upload a release
 	pip install twine
+	rm -fr dist
 	flit build
 	flit install
 	twine upload dist/*
@@ -53,6 +52,7 @@ release: clean ## package and upload a release
 	git push --tags
 
 dist: clean ## builds source and wheel package
+	rm -fr dist
 	flit build
 	ls -l dist
 
