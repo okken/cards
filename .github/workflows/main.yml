@@ -11,7 +11,7 @@ on:
          - dev
 
 jobs:
-  build-n-test:
+  test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -24,9 +24,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: pip install tox
+      run: pip install tox tox-gh-actions
     - name: Test
-      run: tox -e ${{ matrix.python-version }}
+      run: tox
 
   lint:
     runs-on: ubuntu-latest
@@ -37,5 +37,5 @@ jobs:
       - uses: actions/setup-python@v1
         with:
           python-version: 3.8
-      - run: pip install tox
+      - run: pip install tox tox-gh-actions
       - run: tox -e flake8
