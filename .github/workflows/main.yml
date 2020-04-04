@@ -34,10 +34,9 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - name: Set up Python
-      - uses: actions/setup-python@v1
+        uses: actions/setup-python@v1
         with:
           python-version: 3.8
-      - name: Install dependencies
-        run: pip install flake8
-      - name: flake8
-        run: flake8 src tests
+        run: |
+          pip install flake8
+          flake8 src tests
