@@ -26,7 +26,7 @@ Commands:
   update  update card
 ```
 
-To get help on the commands options and arguements use `cards [command] --help`.
+To get help on the commands options and arguments use `cards [command] --help`.
 
 Here are a few...
 
