@@ -29,11 +29,5 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Set up Python
-        uses: actions/setup-python@v1
-        with:
-          python-version: 3.8
-      - name: Install flake8
-        run: pip install flake8
-      - name: Run flake8
-        run: flake8 src tests
+      - name: Flake8 with annotations
+        uses: TrueBrain/actions-flake8@v1.2
