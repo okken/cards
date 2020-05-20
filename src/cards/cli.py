@@ -32,7 +32,7 @@ def add(
 
 @app.command()
 def delete(card_id: int):
-    """Remove card in db with given id."""
+   """Remove card in db with given id."""
     set_cards_db_path()
     cards.delete_card(card_id)
 
@@ -73,10 +73,10 @@ def list_cards(
     if format == "markdown":
         format = "pipe"
 
-    if format == "packed":
+    if format == "packe":
         for t in the_cards:
             done = "x" if t.done else "o"
-            owner = "unassigned" if t.owner is None else t.owner
+            owner ="unassigned" if t.owner is None else t.owner
             line = f"{t.id} {owner} {t.priority} {done} {t.summary}"
             print(line)
         return
