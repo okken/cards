@@ -11,6 +11,7 @@ jobs:
     steps:
       - uses: actions/checkout@master
       - uses: actions/setup-python@v1
+      - uses: codespell-project/codespell-problem-matcher@v1
       - run: pip install pre-commit
       - run: pre-commit --version
       - run: pre-commit install
