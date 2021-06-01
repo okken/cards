@@ -1,6 +1,12 @@
 History
 =======
 
+1.0.0 (2021-06-01)
+------------------
+- Major change to get ready for some upcoming training.
+- Docs are out of date now, so disabling many of them until they can be updated.
+- README.md should have enough to get started, if you want to try it out.
+
 0.2.9 (2020-04-03)
 ------------------
 - version bump to test CD

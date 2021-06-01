@@ -6,8 +6,7 @@ cards
 [![Documentation Status](https://readthedocs.org/projects/cards-project/badge/?version=latest)](https://cards-project.readthedocs.io/en/latest/?badge=latest)
 [![image](https://codecov.io/gh/okken/cards/branch/master/graph/badge.svg)](https://codecov.io/gh/okken/cards)
 
-Project task tracking / todo list (in progress)
-
+Project task tracking / todo list
 
 Initial Goals of the project
 ----------------------------
@@ -20,24 +19,9 @@ Initial Goals of the project
 Rough Current Status
 --------------------
 
--   A \"usable\" API and CLI. The CLI workflow needs work.
--   Database location is flexible to the API, but the CLI hardcodes it
+-   A \"usable\" API and CLI.
+-   Database location is flexible to the API, but the CLI hard codes it
     to a single user home directory.
-
-More info
----------
-
-This is a demo application being built in conjunction with the [Test &
-Code podcast](http://testandcode.com).
-
-We\'ll be building up this application, and testing it, and adding
-functionality, while discussing software testing and development
-practices.
-
-Follow along, starting with [episode 37](http://testandcode.com/37).
-
--   Free software: MIT license
--   Documentation: <https://cards-project.readthedocs.io>.
 
 Usage
 -----
@@ -45,45 +29,53 @@ Usage
 See [usage](https://cards-project.readthedocs.io/en/latest/usage/) page
 for details, but here\'s a demo of how it works:
 
-    $ cards add 'a todo'
+    $ cards add a todo
 
-    $ cards add -o Brian 'another task'
+    $ cards add -o Brian another task
 
     $ cards list
-      ID      owner  done summary
-      --      -----  ---- -------
-       1                  a todo
-       2      Brian       another task
+         ╷       ╷       ╷
+      ID │ state │ owner │ summary
+    ╺━━━━┿━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━━╸
+      1  │ todo  │       │ a todo
+      2  │ todo  │ Brian │ another task
+         ╵       ╵       ╵
 
     $ cards update 1 -o Brian
 
-    $ cards update 1 --done True
+    $ cards finish 1
 
     $ cards
-      ID      owner  done summary
-      --      -----  ---- -------
-       1      Brian    x  a todo
-       2      Brian       another task
+      ID │ state │ owner │ summary
+    ╺━━━━┿━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━━╸
+      1  │ done  │ Brian │ a todo
+      2  │ todo  │ Brian │ another task
+         ╵       ╵       ╵
 
     $ cards delete 1
 
     $ cards
-      ID      owner  done summary
-      --      -----  ---- -------
-       2      Brian       another task
+      ID │ state │ owner │ summary
+    ╺━━━━┿━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━━╸
+      2  │ todo  │ Brian │ another task
+         ╵       ╵       ╵
 
     $ cards --help
     Usage: cards [OPTIONS] COMMAND [ARGS]...
 
-      Run the cards application.
+      Cards is a small command line task tracking application.
 
     Options:
-      --version   Show the version and exit.
-      -h, --help  Show this message and exit.
+      --help  Show this message and exit.
 
     Commands:
-      add     add a card
-      count   list count
-      delete  delete a card
-      list    list cards
-      update  update card
+      add      Add a card to db.
+      config   List the path to the Cards db.
+      count    Return number of cards in db.
+      delete   Remove card in db with given id.
+      finish   Set a card state to 'done'.
+      list     List cards in db.
+      start    Set a card state to 'in prog'.
+      update   Modify a card in db with given id with new info.
+      version  Return version of cards application
+

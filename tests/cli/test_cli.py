@@ -1,73 +1,143 @@
-"""
-Tests using cards CLI (command line interface).
-"""
+from typer.testing import CliRunner
+from cards.cli import app
+import cards
+import pytest
+import shlex
 
 
-def test_add(db_empty, cards_cli, cards_cli_list_items):
-    # GIVEN an empty database
-    # WHEN a new card is added
-    cards_cli("add something -o okken")
-
-    # THEN The listing returns just the new card
-    items = cards_cli_list_items("list")
-    assert len(items) == 1
-    assert items[0].summary == "something"
-    assert items[0].owner == "okken"
+runner = CliRunner()
 
 
-def test_list_filter(db_empty, cards_cli, cards_cli_list_items):
+@pytest.fixture(scope="module")
+def db_path(tmp_path_factory):
+    db_path = tmp_path_factory.mktemp("cards_db")
+    return db_path
+
+
+@pytest.fixture()
+def cards_db(db_path, monkeypatch):
+    monkeypatch.setenv("CARDS_DB_DIR", str(db_path))
+    db_ = cards.CardsDB(db_path)
+    db_.delete_all()
+    yield db_
+    db_.close()
+
+
+@pytest.fixture(scope="function")
+def cards_db_three_cards(cards_db):
+    """CardsDB with 3 cards"""
+    cards_db.add_card(cards.Card("foo"))
+    cards_db.add_card(cards.Card("bar"))
+    cards_db.add_card(cards.Card("baz"))
+    return cards_db
+
+
+def cards_cli(command_string):
+    command_list = shlex.split(command_string)
+    result = runner.invoke(app, command_list)
+    lines = result.stdout.rstrip().splitlines()
+    output = '\n'.join([a_line.rstrip() for a_line in lines])
+    return output
+
+
+def test_version():
+    assert cards_cli('version') == cards.__version__
+
+
+def test_config(db_path, cards_db):
+    assert cards_cli("config") == str(db_path)
+
+
+def test_config_normal_path(db_path):
+    assert cards_cli("config") != str(db_path)
+
+
+def test_count(cards_db_three_cards):
+    assert cards_cli('count') == '3'
+
+
+def test_start(cards_db):
+    i = cards_db.add_card(cards.Card("some task"))
+    cards_cli(f"start {i}")
+    after = cards_db.get_card(i)
+    assert after.state == 'in prog'
+
+
+def test_finish(cards_db):
+    i = cards_db.add_card(cards.Card("some task"))
+    cards_cli(f"finish {i}")
+    after = cards_db.get_card(i)
+    assert after.state == 'done'
+
+
+def test_add(cards_db):
+    cards_cli("add some task")
+    expected = cards.Card("some task", owner="", state="todo")
+    all = cards_db.list_cards()
+    assert len(all) == 1
+    assert all[0] == expected
+
+
+def test_add_with_owner(cards_db):
     """
-    Also kinda tests update
+    A card shows up in the list with expected contents.
     """
-    # GIVEN
-    #  two items owned by okken, one that is done
-    #  two items with no owner, one that is done
-    cards_cli("add -o okken one")
-    cards_cli("add -o anyone two")
-    cards_cli("add -o okken three")
-    cards_cli("add four")
-    cards_cli("add five")
-
-    # get the ids for a couple of them
-    items = cards_cli_list_items("list")
-    for i in items:
-        if i.summary in ("three", "four"):
-            cards_cli(f"update {i.id} -d")
-
-    # `cards --noowner -o okken -d` should return two items
-    items = cards_cli_list_items("list --noowner -o okken -d")
-    assert len(items) == 2
-    for i in items:
-        assert i.summary in ("three", "four")
-        assert i.done == "x"
-        assert i.owner in ("okken", "")
+    cards_cli("add some task -o brian")
+    expected = cards.Card("some task", owner="brian", state="todo")
+    all = cards_db.list_cards()
+    assert len(all) == 1
+    assert all[0] == expected
 
 
-def test_count(db_empty, cards_cli):
-    cards_cli("add one")
-    cards_cli("add two")
-
-    assert cards_cli("count") == "2"
-
-
-def test_delete(db_empty, cards_cli, cards_cli_list_items):
-    # GIVEN a db with 2 items
-    cards_cli("add one")
-    cards_cli("add two")
-
-    an_id = cards_cli_list_items("list")[0].id
-
-    # WHEN we delete one item
-    cards_cli(f"delete {an_id}")
-
-    # THEN the other card remains
-    assert cards_cli("count") == "1"
+def test_delete(cards_db):
+    i = cards_db.add_card(cards.Card("foo"))
+    cards_cli(f"delete {i}")
+    assert cards_db.count() == 0
 
 
-def test_version(cards_cli):
-    """
-    Should return 3 digits separated by a dot
-    """
-    version = cards_cli("version").split(".")
-    assert len(version) == 3
-    assert all([d.isdigit() for d in version])
+def test_update(cards_db):
+    i = cards_db.add_card(cards.Card("foo"))
+    cards_cli(f"update {i} -o okken -s something")
+    expected = cards.Card("something", owner="okken", state="todo")
+    actual = cards_db.get_card(i)
+    assert actual == expected
+
+
+expected_output = """\
+     ╷       ╷       ╷
+  ID │ state │ owner │ summary
+╺━━━━┿━━━━━━━┿━━━━━━━┿━━━━━━━━━━━╸
+  1  │ todo  │       │ some task
+  2  │ todo  │       │ another
+     ╵       ╵       ╵"""
+
+
+def test_list(cards_db):
+    cards_db.add_card(cards.Card("some task"))
+    cards_db.add_card(cards.Card("another"))
+    output = cards_cli("list")
+    assert output == expected_output
+
+
+def test_main(cards_db):
+    cards_db.add_card(cards.Card("some task"))
+    cards_db.add_card(cards.Card("another"))
+    output = cards_cli("")
+    assert output == expected_output
+
+
+# Error cases
+
+
+@pytest.mark.parametrize("command", ["delete 25",
+                                     "start 25",
+                                     "finish 25",
+                                     "update 25 -s foo -o brian"])
+def test_invalid_card_id(cards_db, command):
+    out = cards_cli(command)
+    assert out == "Error: Invalid card id 25"
+
+
+def test_missing_summary(cards_db):
+    out = cards_cli("add")
+    assert "Error: Missing argument 'SUMMARY...'" in out

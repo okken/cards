@@ -1,26 +1,19 @@
 """
 API for the cards project
 """
-import pathlib
 from dataclasses import asdict
 from dataclasses import dataclass
 from dataclasses import field
 from typing import List
 
-import tinydb
-
+from .db import DB
 
 __all__ = [
     "Card",
-    "set_db_path",
-    "get_db_path",
-    "add_card",
-    "get_card",
-    "list_cards",
-    "count",
-    "update_card",
-    "delete_card",
-    "delete_all",
+    "CardsDB",
+    "CardsException",
+    "MissingSummary",
+    "InvalidCardId"
 ]
 
 
@@ -28,8 +21,7 @@ __all__ = [
 class Card:
     summary: str = None
     owner: str = None
-    priority: int = None
-    done: bool = None
+    state: str = "todo"
     id: int = field(default=None, compare=False)
 
     @classmethod
@@ -40,93 +32,88 @@ class Card:
         return asdict(self)
 
 
-_db = None
-_db_path = None
+class CardsException(Exception):
+    pass
 
 
-def set_db_path(db_path=None):
-    global _db
-    global _db_path
-    if db_path is None:
-        _db_path = pathlib.Path().home() / ".cards_db.json"
-    else:
-        _db_path = db_path
-    _db = tinydb.TinyDB(_db_path)
+class MissingSummary(CardsException):
+    pass
 
 
-def get_db_path():
-    return _db_path
+class InvalidCardId(CardsException):
+    pass
 
 
-def add_card(card: Card) -> int:
-    """Add a card, return the id of card."""
-    card.id = _db.insert(card.to_dict())
-    _db.update(card.to_dict(), doc_ids=[card.id])
-    return card.id
+class CardsDB:
+    def __init__(self, db_path):
+        self._db_path = db_path
+        self._db = DB(db_path, ".cards_db")
 
+    def add_card(self, card: Card) -> int:
+        """Add a card, return the id of card."""
+        if not card.summary:
+            raise MissingSummary
+        if card.owner is None:
+            card.owner = ""
+        id = self._db.create(card.to_dict())
+        # update the item with the id added
+        self._db.update(id, {'id': id})
+        return id
 
-def get_card(card_id: int) -> Card:
-    """Return a card with a matching id."""
-    return Card.from_dict(_db.get(doc_id=card_id))
+    def get_card(self, card_id: int) -> Card:
+        """Return a card with a matching id."""
+        db_item = self._db.read(card_id)
+        if db_item is not None:
+            return Card.from_dict(db_item)
+        else:
+            raise InvalidCardId(card_id)
 
+    def list_cards(self, owner=None, state=None) -> List[Card]:
+        """Return a list of cards."""
+        all = self._db.read_all()
+        if (owner is not None) and (state is not None):
+            return [Card.from_dict(t)
+                    for t in all
+                    if (t['owner'] == owner and t['state'] == state)]
+        elif owner is not None:
+            return [Card.from_dict(t) for t in all if t['owner'] == owner]
+        elif state is not None:
+            return [Card.from_dict(t) for t in all if t['state'] == state]
+        else:
+            return [Card.from_dict(t) for t in all]
 
-def list_cards(filter=None) -> List[Card]:
-    """Return a list of all cards."""
-    q = tinydb.Query()
-    if filter:
-        noowner = filter.get("noowner", None)
-        owner = filter.get("owner", None)
-        priority = filter.get("priority", None)
-        done = filter.get("done", None)
-    else:
-        noowner = None
-        owner = None
-        priority = None
-        done = None
-    if noowner and owner:
-        # #E711 comparison to None should be 'if cond is None:'
-        # However, that doesn't work for tinydb
-        results = _db.search(
-            (q.owner == owner) | (q.owner == None) | (q.owner == ""),
-        )  # noqa
-    elif noowner or owner == "":
-        results = _db.search((q.owner == None) | (q.owner == ""))  # noqa
-    elif owner:
-        results = _db.search(q.owner == owner)
-    elif priority:
-        results = _db.search((q.priority != None) & (q.priority <= priority))  # noqa
-    else:
-        results = _db
+    def count(self) -> int:
+        """Return the number of cards in db."""
+        return self._db.count()
 
-    if done is None:
-        # return all cards
-        return [Card.from_dict(t) for t in results]
-    elif done:
-        # only done cards
-        return [Card.from_dict(t) for t in results if t["done"]]
-    else:
-        # only not done cards
-        return [Card.from_dict(t) for t in results if not t["done"]]
+    def update_card(self, card_id: int, card_mods: Card) -> None:
+        """Update a card with modifications."""
+        try:
+            self._db.update(card_id, card_mods.to_dict())
+        except KeyError as exc:
+            raise InvalidCardId(card_id) from exc
 
+    def start(self, card_id: int):
+        """Set a card state to 'in prog'."""
+        self.update_card(card_id, Card(state="in prog"))
 
-def count(noowner=None, owner=None, priority=None, done=None) -> int:
-    """Return the number of cards in db."""
-    filter = {"noowner": noowner, "owner": owner, "priority": priority, "done": done}
-    return len(list_cards(filter=filter))
+    def finish(self, card_id: int):
+        """Set a card state to 'done'."""
+        self.update_card(card_id, Card(state="done"))
 
+    def delete_card(self, card_id: int) -> None:
+        """Remove a card from db with given card_id."""
+        try:
+            self._db.delete(card_id)
+        except KeyError as exc:
+            raise InvalidCardId(card_id) from exc
 
-def update_card(card_id: int, card_mods: Card) -> None:
-    """Update a card with modifications."""
-    d = card_mods.to_dict()
-    changes = {k: v for k, v in d.items() if v is not None}
-    _db.update(changes, doc_ids=[card_id])
+    def delete_all(self) -> None:
+        """Remove all tasks from db."""
+        self._db.delete_all()
 
+    def close(self):
+        self._db.close()
 
-def delete_card(card_id: int) -> None:
-    """Remove a card from db with given card_id."""
-    _db.remove(doc_ids=[card_id])
-
-
-def delete_all() -> None:
-    """Remove all tasks from db."""
-    _db.purge()
+    def path(self):
+        return self._db_path

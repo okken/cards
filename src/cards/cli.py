@@ -1,16 +1,16 @@
 """Command Line Interface (CLI) for cards project."""
-import json
 import os
+from io import StringIO
 import pathlib
+import rich
+from rich.table import Table
+from contextlib import contextmanager
 from typing import List
-
 import cards
 import typer
-from tabulate import tabulate
 
-DEFAULT_TABLEFORMAT = os.environ.get("CARDSTABLEFORMAT", "simple")
 
-app = typer.Typer()
+app = typer.Typer(add_completion=False)
 
 
 @app.command()
@@ -20,143 +20,117 @@ def version():
 
 
 @app.command()
-def add(
-    summary: List[str],
-    owner: str = typer.Option(None, "-o", "--owner", help="set the card owner"),
-):
+def add(summary: List[str],
+        owner: str = typer.Option(None, "-o", "--owner")):
     """Add a card to db."""
-    set_cards_db_path()
     summary = " ".join(summary) if summary else None
-    cards.add_card(cards.Card(summary, owner))
+    with cards_db() as db:
+        db.add_card(cards.Card(summary, owner, state="todo"))
 
 
 @app.command()
 def delete(card_id: int):
     """Remove card in db with given id."""
-    set_cards_db_path()
-    cards.delete_card(card_id)
+    with cards_db() as db:
+        try:
+            db.delete_card(card_id)
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
 
 
 @app.command("list")
 def list_cards(
-    noowner: bool = typer.Option(
-        None, "-n", "--noowner", "--no-owner", help="list cards without owners",
-    ),
-    owner: str = typer.Option(None, "-o", "--owner", help="filter on the cards owner"),
-    priority: int = typer.Option(
-        None, "-p", "--priority", help="fliter on this priority and above",
-    ),
-    done: bool = typer.Option(
-        None, "-d", "--done", help="filter on cards with given done state",
-    ),
-    format: str = typer.Option(
-        DEFAULT_TABLEFORMAT,
-        "-f",
-        "--format",
-        help='table fomratting option, eg. "grid", "simple", "html"',
-    ),
+    owner: str = typer.Option(None, "-o", "--owner"),
+    state: str = typer.Option(None, "-s", "--state"),
 ):
     """
     List cards in db.
     """
-    set_cards_db_path()
-    filter = {"noowner": noowner, "owner": owner, "priority": priority, "done": done}
-    the_cards = cards.list_cards(filter=filter)
-
-    #  json is a special case
-    if format == "json":
-        items = [c.to_dict() for c in the_cards]
-        print(json.dumps({"cards": items}, sort_keys=True, indent=4))
-        return
-
-    # who's going to remember 'pipe' for markdown?
-    if format == "markdown":
-        format = "pipe"
-
-    if format == "packed":
+    with cards_db() as db:
+        the_cards = db.list_cards(owner=owner, state=state)
+        table = Table(box=rich.box.MINIMAL_HEAVY_HEAD)
+        table.add_column("ID")
+        table.add_column("state")
+        table.add_column("owner")
+        table.add_column("summary")
         for t in the_cards:
-            done = "x" if t.done else "o"
-            owner = "unassigned" if t.owner is None else t.owner
-            line = f"{t.id} {owner} {t.priority} {done} {t.summary}"
-            print(line)
-        return
-
-    # all formats except json/none use tabulate
-    items = []
-    for t in the_cards:
-        done = " x " if t.done else ""
-        owner = "" if t.owner is None else t.owner
-        items.append((t.id, owner, t.priority, done, t.summary))
-
-    print(
-        tabulate(
-            items,
-            headers=("ID", "owner", "priority", "done", "summary"),
-            tablefmt=format,
-        ),
-    )
+            owner = "" if t.owner is None else t.owner
+            table.add_row(str(t.id), t.state, owner, t.summary)
+        out = StringIO()
+        rich.print(table, file=out)
+        print(out.getvalue())
 
 
 @app.command()
 def update(
     card_id: int,
-    owner: str = typer.Option(None, "-o", "--owner", help="change the card owner"),
-    priority: int = typer.Option(
-        None, "-p", "--priority", help="change the card priority",
-    ),
-    summary: List[str] = typer.Option(
-        None, "-s", "--summary", help="change the card summary",
-    ),
-    done: bool = typer.Option(None, "-d", "--done", help="change the card done state"),
+    owner: str = typer.Option(None, "-o", "--owner"),
+    summary: List[str] = typer.Option(None, "-s", "--summary"),
 ):
     """Modify a card in db with given id with new info."""
-    set_cards_db_path()
     summary = " ".join(summary) if summary else None
-    cards.update_card(card_id, cards.Card(summary, owner, priority, done))
+    with cards_db() as db:
+        try:
+            db.update_card(card_id, cards.Card(summary, owner, state=None))
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
 
 
 @app.command()
-def count(
-    noowner: bool = typer.Option(
-        None, "-n", "--noowner", "--no-owner", help="count cards without owners",
-    ),
-    owner: str = typer.Option(
-        None, "-o", "--owner", help="count cards with given owner",
-    ),
-    priority: int = typer.Option(
-        None, "-p", "--priority", help="count cards with given priority",
-    ),
-    done: bool = typer.Option(
-        None, "-d", "--done", help="count cards with given done state (True or False)",
-    ),
-):
+def start(card_id: int):
+    """Set a card state to 'in prog'."""
+    with cards_db() as db:
+        try:
+            db.start(card_id)
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
+
+
+@app.command()
+def finish(card_id: int):
+    """Set a card state to 'done'."""
+    with cards_db() as db:
+        try:
+            db.finish(card_id)
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
+
+
+@app.command()
+def config():
+    """List the path to the Cards db."""
+    with cards_db() as db:
+        print(db.path())
+
+
+@app.command()
+def count():
     """Return number of cards in db."""
-    set_cards_db_path()
-    print(cards.count(noowner, owner, priority, done))
+    with cards_db() as db:
+        print(db.count())
 
 
 @app.callback(invoke_without_command=True)
 def main(ctx: typer.Context):
     """
-    Call list_cards of nothing else
+    Cards is a small command line task tracking application.
     """
     if ctx.invoked_subcommand is None:
-        list_cards(
-            noowner=None,
-            owner=None,
-            priority=None,
-            done=None,
-            format=DEFAULT_TABLEFORMAT,
-        )
+        list_cards(owner=None, state=None)
 
 
-def set_cards_db_path():
-    # just put it in users home dir for now
-    db_path = pathlib.Path().home() / ".cards_db.json"
-    cards.set_db_path(db_path)
+def get_path():
+    db_path_env = os.getenv("CARDS_DB_DIR", "")
+    if db_path_env:
+        db_path = pathlib.Path(db_path_env)
+    else:
+        db_path = pathlib.Path.home() / "cards_db"
+    return db_path
 
 
-# useful for debugging during development
-# doesn't need test coverage
-if __name__ == "__main__":
-    app()  # pragma: no cover
+@contextmanager
+def cards_db():
+    db_path = get_path()
+    db = cards.CardsDB(db_path)
+    yield db
+    db.close()
