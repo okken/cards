@@ -4,7 +4,6 @@ API for the cards project
 from dataclasses import asdict
 from dataclasses import dataclass
 from dataclasses import field
-from typing import List
 
 from .db import DB
 
@@ -13,7 +12,7 @@ __all__ = [
     "CardsDB",
     "CardsException",
     "MissingSummary",
-    "InvalidCardId"
+    "InvalidCardId",
 ]
 
 
@@ -49,18 +48,17 @@ class CardsDB:
         self._db_path = db_path
         self._db = DB(db_path, ".cards_db")
 
-    def add_card(self, card: Card) -> int:
+    def add_card(self, card: Card):
         """Add a card, return the id of card."""
         if not card.summary:
             raise MissingSummary
         if card.owner is None:
             card.owner = ""
-        id = self._db.create(card.to_dict())
-        # update the item with the id added
-        self._db.update(id, {'id': id})
-        return id
+        card_id = self._db.create(card.to_dict())
+        self._db.update(card_id, {"id": card_id})
+        return card_id
 
-    def get_card(self, card_id: int) -> Card:
+    def get_card(self, card_id: int):
         """Return a card with a matching id."""
         db_item = self._db.read(card_id)
         if db_item is not None:
@@ -68,25 +66,31 @@ class CardsDB:
         else:
             raise InvalidCardId(card_id)
 
-    def list_cards(self, owner=None, state=None) -> List[Card]:
+    def list_cards(self, owner=None, state=None):
         """Return a list of cards."""
-        all = self._db.read_all()
+        all_cards = self._db.read_all()
         if (owner is not None) and (state is not None):
-            return [Card.from_dict(t)
-                    for t in all
-                    if (t['owner'] == owner and t['state'] == state)]
+            return [
+                Card.from_dict(t)
+                for t in all_cards
+                if (t["owner"] == owner and t["state"] == state)
+            ]
         elif owner is not None:
-            return [Card.from_dict(t) for t in all if t['owner'] == owner]
+            return [
+                Card.from_dict(t) for t in all_cards if t["owner"] == owner
+            ]
         elif state is not None:
-            return [Card.from_dict(t) for t in all if t['state'] == state]
+            return [
+                Card.from_dict(t) for t in all_cards if t["state"] == state
+            ]
         else:
-            return [Card.from_dict(t) for t in all]
+            return [Card.from_dict(t) for t in all_cards]
 
-    def count(self) -> int:
+    def count(self):
         """Return the number of cards in db."""
         return self._db.count()
 
-    def update_card(self, card_id: int, card_mods: Card) -> None:
+    def update_card(self, card_id: int, card_mods: Card):
         """Update a card with modifications."""
         try:
             self._db.update(card_id, card_mods.to_dict())
@@ -101,15 +105,15 @@ class CardsDB:
         """Set a card state to 'done'."""
         self.update_card(card_id, Card(state="done"))
 
-    def delete_card(self, card_id: int) -> None:
+    def delete_card(self, card_id: int):
         """Remove a card from db with given card_id."""
         try:
             self._db.delete(card_id)
         except KeyError as exc:
             raise InvalidCardId(card_id) from exc
 
-    def delete_all(self) -> None:
-        """Remove all tasks from db."""
+    def delete_all(self):
+        """Remove all cards from db."""
         self._db.delete_all()
 
     def close(self):

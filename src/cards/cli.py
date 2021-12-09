@@ -20,8 +20,9 @@ def version():
 
 
 @app.command()
-def add(summary: List[str],
-        owner: str = typer.Option(None, "-o", "--owner")):
+def add(
+    summary: List[str], owner: str = typer.Option(None, "-o", "--owner")
+):
     """Add a card to db."""
     summary = " ".join(summary) if summary else None
     with cards_db() as db:
@@ -48,7 +49,7 @@ def list_cards(
     """
     with cards_db() as db:
         the_cards = db.list_cards(owner=owner, state=state)
-        table = Table(box=rich.box.MINIMAL_HEAVY_HEAD)
+        table = Table(box=rich.box.SIMPLE)
         table.add_column("ID")
         table.add_column("state")
         table.add_column("owner")
@@ -71,7 +72,9 @@ def update(
     summary = " ".join(summary) if summary else None
     with cards_db() as db:
         try:
-            db.update_card(card_id, cards.Card(summary, owner, state=None))
+            db.update_card(
+                card_id, cards.Card(summary, owner, state=None)
+            )
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
 
