@@ -4,18 +4,16 @@ Test Cases
 * `count` with one item
 * `count` with more than one item
 """
-from cards import Card
+import pytest
 
 
 def test_count_no_cards(cards_db):
     assert cards_db.count() == 0
 
-
+@pytest.mark.num_cards(1)
 def test_count_one_card(cards_db):
-    cards_db.add_card(Card("foo"))
     assert cards_db.count() == 1
 
-
-def test_count_three_cards(cards_db_three_cards):
-    cards_db = cards_db_three_cards
+@pytest.mark.num_cards(3)
+def test_count_three_cards(cards_db):
     assert cards_db.count() == 3

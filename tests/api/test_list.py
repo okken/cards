@@ -6,7 +6,6 @@ Test Cases
 import pytest
 from cards import Card
 
-
 def test_list_no_cards(cards_db):
     """Empty db, empty list"""
     assert cards_db.list_cards() == []
@@ -31,6 +30,11 @@ def test_list_several_cards(cards_db):
     for c in orig:
         assert c in the_list
 
+# list filter
+# - no owner
+# - specific owner
+# - specific state
+# - owner and state
 
 @pytest.fixture()
 def known_set():
@@ -46,13 +50,11 @@ def known_set():
             Card(summary="seven", state="in prog"),
             Card(summary="eight", state="done")]
 
-
 @pytest.fixture()
 def db_filled(cards_db, known_set):
     for c in known_set:
         cards_db.add_card(c)
     return cards_db
-
 
 @pytest.mark.parametrize('owner_, state_, expected_indices', [
     ("", None, (6, 7, 8)),
@@ -68,3 +70,4 @@ def test_list_filter(db_filled, known_set, owner_, state_, expected_indices):
     assert len(result) == len(expected_indices)
     for i in expected_indices:
         assert known_set[i] in result
+

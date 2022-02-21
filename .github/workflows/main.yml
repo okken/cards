@@ -1,39 +1,23 @@
-name: CI
+name: main
 
-on:
-    push:
-        branches:
-         - master
-         - dev
+on: [push, pull_request]
 
 jobs:
-  test:
+  build:
+
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: [3.7, 3.8]
+        python: ["3.7", "3.8", "3.9", "3.10"]
 
     steps:
-    - uses: actions/checkout@v1
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v1
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: pip install tox tox-gh-actions
-    - name: Test
-      run: tox
-
-  lint:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v1
-      - name: Set up Python
-        uses: actions/setup-python@v1
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
         with:
-          python-version: 3.8
-      - name: Install flake8
-        run: pip install flake8
-      - name: Run flake8
-        run: flake8 src tests
+          python-version: ${{ matrix.python }}
+      - name: Install Tox and any other packages
+        run: pip install tox
+      - name: Run Tox
+        # Run tox using the version of Python in `PATH`
+        run: tox -e py
