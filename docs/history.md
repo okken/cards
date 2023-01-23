@@ -35,7 +35,7 @@ History
 ------------------
 - list now supports --format and accepts all formats that the tabulate package
 formats.
-- uses dataclass insead of attrs for Python 3.7
+- uses dataclass instead of attrs for Python 3.7
 
 0.1.11 (2018-03-28)
 ------------------
