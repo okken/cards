@@ -1,5 +1,6 @@
 import cards
 
+
 def test_add(cards_db, cards_cli):
     cards_cli("add some task")
     expected = cards.Card("some task", owner="", state="todo")

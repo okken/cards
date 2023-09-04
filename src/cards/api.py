@@ -76,13 +76,9 @@ class CardsDB:
                 if (t["owner"] == owner and t["state"] == state)
             ]
         elif owner is not None:
-            return [
-                Card.from_dict(t) for t in all_cards if t["owner"] == owner
-            ]
+            return [Card.from_dict(t) for t in all_cards if t["owner"] == owner]
         elif state is not None:
-            return [
-                Card.from_dict(t) for t in all_cards if t["state"] == state
-            ]
+            return [Card.from_dict(t) for t in all_cards if t["state"] == state]
         else:
             return [Card.from_dict(t) for t in all_cards]
 

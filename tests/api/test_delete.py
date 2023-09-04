@@ -5,14 +5,17 @@ Test Cases:
 * `delete` a non-existent card
 """
 import pytest
-from cards import Card, InvalidCardId
+from cards import Card
+from cards import InvalidCardId
+
 
 @pytest.fixture()
 def three_cards(cards_db):
     i = cards_db.add_card(Card("foo"))
     j = cards_db.add_card(Card("bar"))
     k = cards_db.add_card(Card("baz"))
-    return (i, j, k) # ids for the cards
+    return (i, j, k)  # ids for the cards
+
 
 def test_delete_from_many(cards_db, three_cards):
     """
@@ -20,7 +23,7 @@ def test_delete_from_many(cards_db, three_cards):
     And card shouldn't be retrievable.
     But the rest should be.
     """
-    (i, j, k) = three_cards # ids
+    (i, j, k) = three_cards  # ids
     id_to_delete = j
     ids_still_there = (i, k)
 

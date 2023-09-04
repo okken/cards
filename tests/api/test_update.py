@@ -6,7 +6,8 @@ Test Cases
 * `update` a non-existent card
 """
 import pytest
-from cards import Card, InvalidCardId
+from cards import Card
+from cards import InvalidCardId
 
 
 def test_update_owner(cards_db):

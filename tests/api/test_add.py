@@ -7,7 +7,9 @@ Test Cases
 * `add` a duplicate card
 """
 import pytest
-from cards import Card, MissingSummary
+from cards import Card
+from cards import MissingSummary
+
 
 def test_add_from_empty(cards_db):
     """
@@ -29,6 +31,7 @@ def test_add_from_nonempty(cards_db):
     assert cards_db.count() == 4
     assert cards_db.get_card(i) == c
 
+
 def test_add_with_summary_and_owner(cards_db):
     """
     count should be 1 and card retrievable
@@ -38,6 +41,7 @@ def test_add_with_summary_and_owner(cards_db):
     assert cards_db.count() == 1
     assert cards_db.get_card(i) == c
 
+
 def test_add_missing_summary(cards_db):
     """
     Should raise an exception
@@ -45,6 +49,7 @@ def test_add_missing_summary(cards_db):
     c = Card()
     with pytest.raises(MissingSummary):
         cards_db.add_card(c)
+
 
 def test_add_duplicate(cards_db):
     """

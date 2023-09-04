@@ -1,9 +1,11 @@
-from typer.testing import CliRunner
-import cards
-import pytest
 import shlex
 
+import cards
+import pytest
+from typer.testing import CliRunner
+
 runner = CliRunner()
+
 
 @pytest.fixture()
 def cards_cli_no_redirect():
@@ -12,7 +14,9 @@ def cards_cli_no_redirect():
         result = runner.invoke(cards.cli.app, command_list)
         output = result.stdout.rstrip()
         return output
+
     return run_cli
+
 
 @pytest.fixture()
 def cards_cli(cards_cli_no_redirect, db_path, monkeypatch, cards_db):

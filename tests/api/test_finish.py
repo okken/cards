@@ -4,7 +4,8 @@ Test Cases
 * `finish` an invalid id
 """
 import pytest
-from cards import Card, InvalidCardId
+from cards import Card
+from cards import InvalidCardId
 
 
 @pytest.mark.parametrize("start_state", ("todo", "in prog", "done"))

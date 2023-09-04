@@ -1,13 +1,14 @@
 """Command Line Interface (CLI) for cards project."""
 import os
-from io import StringIO
 import pathlib
-import rich
-from rich.table import Table
 from contextlib import contextmanager
+from io import StringIO
 from typing import List
+
 import cards
+import rich
 import typer
+from rich.table import Table
 
 
 app = typer.Typer(add_completion=False)
@@ -20,9 +21,7 @@ def version():
 
 
 @app.command()
-def add(
-    summary: List[str], owner: str = typer.Option(None, "-o", "--owner")
-):
+def add(summary: List[str], owner: str = typer.Option(None, "-o", "--owner")):
     """Add a card to db."""
     summary = " ".join(summary) if summary else None
     with cards_db() as db:
@@ -72,9 +71,7 @@ def update(
     summary = " ".join(summary) if summary else None
     with cards_db() as db:
         try:
-            db.update_card(
-                card_id, cards.Card(summary, owner, state=None)
-            )
+            db.update_card(card_id, cards.Card(summary, owner, state=None))
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
 

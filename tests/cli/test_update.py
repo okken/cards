@@ -1,5 +1,6 @@
 import cards
 
+
 def test_update(cards_db, cards_cli):
     i = cards_db.add_card(cards.Card("foo"))
     cards_cli(f"update {i} -o okken -s something")
