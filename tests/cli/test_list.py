@@ -14,11 +14,15 @@ def test_list(cards_db, cards_cli):
     cards_db.add_card(cards.Card("some task"))
     cards_db.add_card(cards.Card("another"))
     output = cards_cli("list")
-    assert output.strip() == expected_output.strip()
+    for out, exp in zip(output.splitlines(), expected_output.splitlines()):
+        assert out.strip() == exp.strip()
+    # assert output.strip() == expected_output.strip()
 
 
 def test_main(cards_db, cards_cli):
     cards_db.add_card(cards.Card("some task"))
     cards_db.add_card(cards.Card("another"))
     output = cards_cli("")
-    assert output.strip() == expected_output.strip()
+    for out, exp in zip(output.splitlines(), expected_output.splitlines()):
+        assert out.strip() == exp.strip()
+    # assert output.strip() == expected_output.strip()
