@@ -1,81 +1,75 @@
 cards
 =====
 
-[![image](https://img.shields.io/pypi/v/cards.svg)](https://pypi.python.org/pypi/cards)
-[![image](https://github.com/okken/cards/workflows/CI/badge.svg?branch=master)](https://github.com/okken/cards/actions?workflow=CI)
-[![Documentation Status](https://readthedocs.org/projects/cards-project/badge/?version=latest)](https://cards-project.readthedocs.io/en/latest/?badge=latest)
-[![image](https://codecov.io/gh/okken/cards/branch/master/graph/badge.svg)](https://codecov.io/gh/okken/cards)
-
 Project task tracking / todo list
 
-Initial Goals of the project
+A Teaching Project
 ----------------------------
 
--   Create a command line application that can be used to track the
-    status of a multi-person project.
--   Explore the problems inherent in all applications regarding
-    usability, testing, packaging, deployment, etc.
+This project is used for teaching the concepts of software testing.
+Specifically, testing with the pytest test framework.
 
-Rough Current Status
---------------------
+The project appears in:
+- [The Complete pytest Course](https://pythontest.com/courses/)
+  - uses cards version 2.0.0
+- [Python Testing with pytest, 2nd edition](https://pythontest.com/pytest-book/)
+  - uses cards version 1.0.1 - approximately
 
--   A \"usable\" API and CLI.
--   Database location is flexible to the API, but the CLI hard codes it
-    to a single user home directory.
+Can be used as a simple todo list
+---------------------------------
+
+Even though the primary goal of the project is for teaching about software testing, I also use it as a simple command line task tracker for myself and my team.
 
 Usage
 -----
 
-See [usage](https://cards-project.readthedocs.io/en/latest/usage/) page
-for details, but here\'s a demo of how it works:
+Here's a demo of how it works:
 
     $ cards add a todo
-
     $ cards add -o Brian another task
-
     $ cards list
-         ╷       ╷       ╷
-      ID │ state │ owner │ summary
-    ╺━━━━┿━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━━╸
-      1  │ todo  │       │ a todo
-      2  │ todo  │ Brian │ another task
-         ╵       ╵       ╵
+
+    ID   state   owner   summary
+    ───────────────────────────────────
+    1    todo            a todo
+    2    todo    Brian   another task
 
     $ cards update 1 -o Brian
 
-    $ cards finish 1
 
+    $ cards finish 1
     $ cards
-      ID │ state │ owner │ summary
-    ╺━━━━┿━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━━╸
-      1  │ done  │ Brian │ a todo
-      2  │ todo  │ Brian │ another task
-         ╵       ╵       ╵
+
+      ID   state   owner   summary
+     ───────────────────────────────────
+      1    done    Brian   a todo
+      2    todo    Brian   another task
+
 
     $ cards delete 1
-
     $ cards
-      ID │ state │ owner │ summary
-    ╺━━━━┿━━━━━━━┿━━━━━━━┿━━━━━━━━━━━━━━╸
-      2  │ todo  │ Brian │ another task
-         ╵       ╵       ╵
+
+      ID   state   owner   summary
+     ───────────────────────────────────
+      2    todo    Brian   another task
 
     $ cards --help
-    Usage: cards [OPTIONS] COMMAND [ARGS]...
 
-      Cards is a small command line task tracking application.
+     Usage: cards [OPTIONS] COMMAND [ARGS]...
 
-    Options:
-      --help  Show this message and exit.
+     Cards is a small command line task tracking application.
 
-    Commands:
-      add      Add a card to db.
-      config   List the path to the Cards db.
-      count    Return number of cards in db.
-      delete   Remove card in db with given id.
-      finish   Set a card state to 'done'.
-      list     List cards in db.
-      start    Set a card state to 'in prog'.
-      update   Modify a card in db with given id with new info.
-      version  Return version of cards application
-
+    ╭─ Options ────────────────────────────────────────────────────────╮
+    │ --help          Show this message and exit.                      │
+    ╰──────────────────────────────────────────────────────────────────╯
+    ╭─ Commands ───────────────────────────────────────────────────────╮
+    │ add       Add a card to db.                                      │
+    │ config    List the path to the Cards db.                         │
+    │ count     Return number of cards in db.                          │
+    │ delete    Remove card in db with given id.                       │
+    │ finish    Set a card state to 'done'.                            │
+    │ list      List cards in db.                                      │
+    │ start     Set a card state to 'in prog'.                         │
+    │ update    Modify a card in db with given id with new info.       │
+    │ version   Return version of cards application                    │
+    ╰──────────────────────────────────────────────────────────────────╯

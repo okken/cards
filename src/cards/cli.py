@@ -4,11 +4,13 @@ from io import StringIO
 import pathlib
 import rich
 from rich.table import Table
+from rich.box import SIMPLE
 from contextlib import contextmanager
-from typing import List
-import cards
-import typer
+from typing import List, Optional
 
+import cards
+
+import typer
 
 app = typer.Typer(add_completion=False)
 
@@ -20,9 +22,7 @@ def version():
 
 
 @app.command()
-def add(
-    summary: List[str], owner: str = typer.Option(None, "-o", "--owner")
-):
+def add(summary: List[str], owner: str = typer.Option(None, "-o", "--owner")):
     """Add a card to db."""
     summary = " ".join(summary) if summary else None
     with cards_db() as db:
@@ -41,15 +41,15 @@ def delete(card_id: int):
 
 @app.command("list")
 def list_cards(
-    owner: str = typer.Option(None, "-o", "--owner"),
-    state: str = typer.Option(None, "-s", "--state"),
+    owner: Optional[str] = typer.Option(None, "-o", "--owner"),
+    state: Optional[str] = typer.Option(None, "-s", "--state"),
 ):
     """
     List cards in db.
     """
     with cards_db() as db:
         the_cards = db.list_cards(owner=owner, state=state)
-        table = Table(box=rich.box.SIMPLE)
+        table = Table(box=SIMPLE)
         table.add_column("ID")
         table.add_column("state")
         table.add_column("owner")
@@ -72,9 +72,7 @@ def update(
     summary = " ".join(summary) if summary else None
     with cards_db() as db:
         try:
-            db.update_card(
-                card_id, cards.Card(summary, owner, state=None)
-            )
+            db.update_card(card_id, cards.Card(summary, owner, state=None))
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
 
@@ -137,3 +135,7 @@ def cards_db():
     db = cards.CardsDB(db_path)
     yield db
     db.close()
+
+
+if __name__ == "__main__":
+    app()
