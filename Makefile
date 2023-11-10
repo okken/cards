@@ -3,9 +3,9 @@
 .DEFAULT_GOAL := help
 
 help:
-	@python -c "$$PRINT_HELP_PYSCRIPT" < $(MAKEFILE_LIST)
+	grep '\#\#' Makefile
 
-clean: clean-build clean-pyc clean-test clean-docs ## remove all build, test, coverage and Python artifacts
+clean: clean-build clean-pyc clean-test ## remove all build, test, coverage and Python artifacts
 
 clean-build: ## remove build artifacts
 	rm -fr dist/
@@ -18,43 +18,40 @@ clean-pyc: ## remove Python file artifacts
 
 clean-test: ## remove test and coverage artifacts
 	rm -fr .tox/
-	rm -f .coverage
-	rm -fr htmlcov/
-	rm -fr .pytest_cache/
+	find . -name '.coverage' -exec rm -fr {} +
+	find . -name 'htmlcov' -exec rm -fr {} +
+	find . -name '.pytest_cache' -exec rm -fr {} +
 
-clean-docs: ## remove mkdocs site
-	rm -fr site/
+lint: ## check style
+	tox -e lint
 
-lint: ## check style with flake8
-	tox -e flake8
+test: ## run tests on one version of Python
+	tox -e py
 
-test: ## run tests quickly with the default Python
+tox:  ## run tests on all available versions of Python
 	tox
-
-tox:  ## alias so "make tox" works
-	tox
-
-docs: ## generate HTML documentation
-	pip install mkdocs
-	mkdocs build
-
-servedocs: docs ## compile the docs watching for changes
-	mkdocs serve
 
 release: clean ## package and upload a release
-	pip install twine
 	rm -fr dist
-	flit build
-	flit install
-	twine upload dist/*
+	flit publish
 	@echo "pushing tags"
 	git tag $(cards version)
 	git push --tags
 
 dist: clean ## builds source and wheel package
-	rm -fr dist
 	flit build
 	ls -l dist
 
-install: clean ## install the package to the active Python's site-packages
-	flit install --symlink
+install: ## install in editable mode
+	pip install -e .
+
+dev: ## create dev env
+	py -m venv venv --prompt cards_proj
+	venv/bin/pip install -U pip
+	venv/bin/pip install pytest tox pytest-cov coverage
+	venv/bin/pip install -e .
+	@echo "-------------------------"
+	@echo "dev env ready to activate"
+	@echo "-------------------------"
+
+

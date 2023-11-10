@@ -1,7 +1,0 @@
-site_name: Cards Project
-nav:
-    - Home: index.md
-    - Installation: installation.md
-    - Version History: history.md
-
-theme: readthedocs
