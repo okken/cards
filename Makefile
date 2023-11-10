@@ -31,13 +31,6 @@ test: ## run tests on one version of Python
 tox:  ## run tests on all available versions of Python
 	tox
 
-release: clean ## package and upload a release
-	rm -fr dist
-	flit publish
-	@echo "pushing tags"
-	git tag $(cards version)
-	git push --tags
-
 dist: clean ## builds source and wheel package
 	flit build
 	ls -l dist
