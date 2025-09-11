@@ -10,7 +10,7 @@ This project is used for teaching the concepts of software testing.
 Specifically, testing with the pytest test framework.
 
 The project appears in:
-- [The Complete pytest Course](https://pythontest.com/courses/)
+- [The Complete pytest Course](https://courses/pythontest.com/)
   - uses cards version 2.0.0
 - [Python Testing with pytest, 2nd edition](https://pythontest.com/pytest-book/)
   - uses cards version 1.0.1 - approximately

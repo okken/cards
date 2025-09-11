@@ -1,7 +1,7 @@
 import cards
 import pytest
 
-from cards_cli_helper import cards_cli
+from cards_cli_helper import cards_cli, cards_cli_out_err
 
 
 @pytest.fixture(autouse=True)
@@ -111,6 +111,6 @@ def test_invalid_card_id(cards_db, command):
 
 
 def test_missing_summary(cards_db):
-    out = cards_cli("add")
-    assert "Error" in out
-    assert "Missing argument 'SUMMARY...'" in out
+    out, err = cards_cli_out_err("add")
+    assert "Error" in err
+    assert "Missing argument 'SUMMARY...'" in err
