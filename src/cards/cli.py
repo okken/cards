@@ -49,7 +49,7 @@ def list_cards(
     """
     with cards_db() as db:
         the_cards = db.list_cards(owner=owner, state=state)
-        table = Table(box=SIMPLE)
+        table = Table(box=SIMPLE, header_style="")
         table.add_column("ID")
         table.add_column("state")
         table.add_column("owner")
