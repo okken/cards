@@ -1,7 +1,7 @@
 import cards
 import pytest
 
-from cards_cli_helper import cards_cli, cards_cli_out_err
+from .cards_cli_helper import cards_cli, cards_cli_out_err
 
 
 @pytest.fixture(autouse=True)

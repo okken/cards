@@ -24,9 +24,9 @@ def version():
 @app.command()
 def add(summary: List[str], owner: str = typer.Option(None, "-o", "--owner")):
     """Add a card to db."""
-    summary = " ".join(summary) if summary else None
+    summary_str = " ".join(summary) if summary else None
     with cards_db() as db:
-        db.add_card(cards.Card(summary, owner, state="todo"))
+        db.add_card(cards.Card(summary_str, owner, state="todo"))
 
 
 @app.command()
@@ -69,10 +69,10 @@ def update(
     summary: List[str] = typer.Option(None, "-s", "--summary"),
 ):
     """Modify a card in db with given id with new info."""
-    summary = " ".join(summary) if summary else None
+    summary_str = " ".join(summary) if summary else None
     with cards_db() as db:
         try:
-            db.update_card(card_id, cards.Card(summary, owner, state=None))
+            db.update_card(card_id, cards.Card(summary_str, owner, state=None))
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
 
