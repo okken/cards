@@ -1,0 +1,15 @@
+[run]
+branch = True
+source =
+    cards
+    tests
+
+[paths]
+source =
+    src
+    */site-packages
+
+[report]
+fail_under = 100
+exclude_also =
+    if __name__ == .__main__.:

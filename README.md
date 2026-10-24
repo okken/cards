@@ -10,7 +10,7 @@ This project is used for teaching the concepts of software testing.
 Specifically, testing with the pytest test framework.
 
 The project appears in:
-- [The Complete pytest Course](https://courses/pythontest.com/)
+- [The Complete pytest Course](https://courses.pythontest.com/)
   - uses cards version 2.0.0
 - [Python Testing with pytest, 2nd edition](https://pythontest.com/pytest-book/)
   - uses cards version 1.0.1 - approximately
@@ -35,7 +35,20 @@ Here's a demo of how it works:
     2    todo    Brian   another task
 
     $ cards update 1 -o Brian
-
+ .  $ cards
+                                     
+    ID   state   owner   summary       
+    ─────────────────────────────────── 
+      1    todo    Brian   a todo        
+      2    todo    Brian   another task  
+                                      
+    $ cards start 1
+    $ cards
+                                       
+      ID   state     owner   summary       
+     ───────────────────────────────────── 
+      1    in prog   Brian   a todo        
+      2    todo      Brian   another task 
 
     $ cards finish 1
     $ cards
