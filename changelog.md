@@ -47,7 +47,7 @@ TEMPLATE_END
 
 -->
 
-## [2.0.1] - 23-Oct-2026
+## [2.0.2] - 24-Oct-2026
 
 ### Developer Experience
 

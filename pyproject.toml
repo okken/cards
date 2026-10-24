@@ -5,6 +5,8 @@ build-backend = "flit_core.buildapi"
 [project]
 name = "cards"
 authors = [{name = "Brian Okken"}]
+readme = "README.md"
+dynamic = ["version", "description"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
     'Programming Language :: Python :: 3.10',
@@ -14,7 +16,6 @@ classifiers = [
     'Programming Language :: Python :: 3.14',
 ]
 requires-python=">=3.10"
-dynamic = ["version", "description"]
 dependencies = [
     "tinydb==4.8.2",
     "typer==0.17.4",
