@@ -86,3 +86,22 @@ Here's a demo of how it works:
     │ update    Modify a card in db with given id with new info.       │
     │ version   Return version of cards application                    │
     ╰──────────────────────────────────────────────────────────────────╯
+
+
+Using the Cards web app
+-----------------------
+
+By default, cards are stored in a local file (`~/cards_db`, or `CARDS_DB_DIR`).
+
+To use a team's cards on the Cards web app instead, set:
+
+    export CARDS_URL=https://<cards web app address>
+    export CARDS_TEAM=<team slug, as in /a/<team slug>/ in web app URLs>
+    export CARDS_API_KEY=<an API key from your profile page in the web app>
+
+The commands work the same way. `cards config` shows which web app and team
+you're using. Owners are team members: use `-o me`, or a member's email or
+name. If an owner doesn't match anyone on the team, cards asks who you meant:
+
+    $ cards add fix the docs -o brain
+    'brain' isn't a team member. Did you mean Brian Okken (brian@pythontest.com)? [y/N]: y

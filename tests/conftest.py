@@ -3,6 +3,13 @@ import pytest
 from cards import Card
 
 
+@pytest.fixture(autouse=True)
+def no_web_app(monkeypatch):
+    """Keep tests local, even if the shell running them has CARDS_URL set."""
+    for name in ["CARDS_URL", "CARDS_TEAM", "CARDS_API_KEY"]:
+        monkeypatch.delenv(name, raising=False)
+
+
 @pytest.fixture(scope="session")
 def tmp_db_path(tmp_path_factory):
     """Path to temporary database"""

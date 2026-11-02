@@ -47,6 +47,16 @@ TEMPLATE_END
 
 -->
 
+## [Unreleased]
+
+### Added
+
+- Optional web app mode: when `CARDS_URL` is set (with `CARDS_TEAM` and
+  `CARDS_API_KEY`), the CLI stores cards in the Cards web app through its API
+  instead of the local database. Local mode is unchanged.
+- In web app mode, an owner that doesn't match a team member gets a
+  "Did you mean ...?" prompt, using the web app's suggestions.
+
 ## [2.0.2] - 24-Oct-2026
 
 ### Developer Experience

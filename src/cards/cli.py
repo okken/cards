@@ -9,6 +9,7 @@ from contextlib import contextmanager
 from typing import List, Optional
 
 import cards
+from cards.remote import OwnerNotFound, RemoteCardsDB, RemoteError
 
 import typer
 
@@ -26,7 +27,9 @@ def add(summary: List[str], owner: str = typer.Option(None, "-o", "--owner")):
     """Add a card to db."""
     summary_str = " ".join(summary) if summary else None
     with cards_db() as db:
-        db.add_card(cards.Card(summary_str, owner, state="todo"))
+        with_owner_check(
+            owner, lambda owner: db.add_card(cards.Card(summary_str, owner, state="todo"))
+        )
 
 
 @app.command()
@@ -48,7 +51,9 @@ def list_cards(
     List cards in db.
     """
     with cards_db() as db:
-        the_cards = db.list_cards(owner=owner, state=state)
+        the_cards = with_owner_check(
+            owner, lambda owner: db.list_cards(owner=owner, state=state)
+        )
         table = Table(box=SIMPLE, header_style="")
         table.add_column("ID")
         table.add_column("state")
@@ -72,7 +77,12 @@ def update(
     summary_str = " ".join(summary) if summary else None
     with cards_db() as db:
         try:
-            db.update_card(card_id, cards.Card(summary_str, owner, state=None))
+            with_owner_check(
+                owner,
+                lambda owner: db.update_card(
+                    card_id, cards.Card(summary_str, owner, state=None)
+                ),
+            )
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
 
@@ -129,12 +139,56 @@ def get_path():
     return db_path
 
 
+def open_db():
+    """The web app's API if CARDS_URL is set, otherwise the local database."""
+    url = os.getenv("CARDS_URL", "")
+    if not url:
+        return cards.CardsDB(get_path())
+    team = os.getenv("CARDS_TEAM", "")
+    api_key = os.getenv("CARDS_API_KEY", "")
+    if not (team and api_key):
+        print("Error: CARDS_URL is set, so CARDS_TEAM and CARDS_API_KEY are needed too.")
+        raise typer.Exit(1)
+    return RemoteCardsDB(url, team, api_key)
+
+
 @contextmanager
 def cards_db():
-    db_path = get_path()
-    db = cards.CardsDB(db_path)
-    yield db
-    db.close()
+    db = open_db()
+    try:
+        yield db
+    except RemoteError as exc:
+        print(f"Error: {exc}")
+        raise typer.Exit(1)
+    finally:
+        db.close()
+
+
+def with_owner_check(owner, func):
+    """Call func(owner). If the web app doesn't recognize the owner, ask which
+    team member was meant (from its suggestions), and call func again with them."""
+    try:
+        return func(owner)
+    except OwnerNotFound as exc:
+        return func(pick_owner(exc))
+
+
+def pick_owner(exc):
+    """Ask which suggested team member was meant; return their email."""
+    if len(exc.suggestions) == 1:
+        email, name = exc.suggestions[0]
+        if typer.confirm(f"'{exc.owner}' isn't a team member. Did you mean {name} ({email})?"):
+            return email
+        raise typer.Exit(1)
+    print(exc.message)
+    if not exc.suggestions:
+        raise typer.Exit(1)
+    for number, (email, name) in enumerate(exc.suggestions, start=1):
+        print(f"  {number}: {name} ({email})")
+    choice = typer.prompt("Which one? (0 to cancel)", type=int, default=0)
+    if 1 <= choice <= len(exc.suggestions):
+        return exc.suggestions[choice - 1][0]
+    raise typer.Exit(1)
 
 
 if __name__ == "__main__":
