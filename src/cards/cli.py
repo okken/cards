@@ -37,6 +37,7 @@ def delete(card_id: int):
             db.delete_card(card_id)
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
+            raise typer.Exit(code=1)
 
 
 @app.command("list")
@@ -75,6 +76,7 @@ def update(
             db.update_card(card_id, cards.Card(summary_str, owner, state=None))
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
+            raise typer.Exit(code=1)
 
 
 @app.command()
@@ -85,6 +87,7 @@ def start(card_id: int):
             db.start(card_id)
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
+            raise typer.Exit(code=1)
 
 
 @app.command()
@@ -95,6 +98,7 @@ def finish(card_id: int):
             db.finish(card_id)
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
+            raise typer.Exit(code=1)
 
 
 @app.command()
