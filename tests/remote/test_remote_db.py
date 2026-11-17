@@ -104,3 +104,10 @@ def test_delete_all_not_supported(remote_db):
 
 def test_path(remote_db):
     assert remote_db.path() == "http://cards.test (team: sox)"
+
+
+def test_later_round_trip(remote_db):
+    i = remote_db.add_card(Card("parked", later=True))
+    assert remote_db.get_card(i).later is True
+    remote_db.sooner(i)
+    assert remote_db.get_card(i).later is None

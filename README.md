@@ -82,6 +82,27 @@ Here's a demo of how it works:
      ───────────────────────────────────
       2    todo    Brian   another task
 
+Cards you're not getting to soon can be parked on the Later list.
+`cards` and `cards list` show the Sooner list, and mention how many cards are waiting:
+
+    $ cards add rewrite the docs --later
+    $ cards
+
+      ID   state   owner   summary
+     ───────────────────────────────────
+      2    todo    Brian   another task
+
+    1 more on the Later list: cards list --later
+
+    $ cards list --later
+
+      ID   state   owner   summary
+     ───────────────────────────────────────
+      3    todo            rewrite the docs
+
+    $ cards sooner 3      # move it back; `cards later ID` parks a card
+    $ cards list --all    # both lists, with a "list" column
+
     $ cards --help
 
      Usage: cards [OPTIONS] COMMAND [ARGS]...
@@ -99,7 +120,10 @@ Here's a demo of how it works:
     │ delete    Remove card in db with given id.                       │
     │ details   Show a card's details (or edit them with --edit).      │
     │ finish    Set a card state to 'done'.                            │
-    │ list      List cards in db.                                      │
+    │ later     Move a card to the Later list.                         │
+    │ list      List cards in db (the Sooner list, unless --later or   │
+    │           --all).                                                │
+    │ sooner    Move a card back to the Sooner list.                   │
     │ start     Set a card state to 'in prog'.                         │
     │ update    Modify a card in db with given id with new info.       │
     │ version   Return version of cards application                    │

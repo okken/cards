@@ -23,12 +23,19 @@ def version():
 
 
 @app.command()
-def add(summary: List[str], owner: str = typer.Option(None, "-o", "--owner")):
+def add(
+    summary: List[str],
+    owner: str = typer.Option(None, "-o", "--owner"),
+    later: bool = typer.Option(False, "-l", "--later", help="Put the card on the Later list."),
+):
     """Add a card to db."""
     summary_str = " ".join(summary) if summary else None
     with cards_db() as db:
         with_owner_check(
-            owner, lambda owner: db.add_card(cards.Card(summary_str, owner, state="todo"))
+            owner,
+            lambda owner: db.add_card(
+                cards.Card(summary_str, owner, state="todo", later=later or None)
+            ),
         )
 
 
@@ -46,28 +53,40 @@ def delete(card_id: int):
 def list_cards(
     owner: Optional[str] = typer.Option(None, "-o", "--owner"),
     state: Optional[str] = typer.Option(None, "-s", "--state"),
+    later: bool = typer.Option(False, "-l", "--later", help="Show the Later list."),
+    all_lists: bool = typer.Option(False, "-a", "--all", help="Show both the Sooner and Later lists."),
 ):
     """
-    List cards in db.
+    List cards in db (the Sooner list, unless --later or --all).
     """
     with cards_db() as db:
-        the_cards = with_owner_check(
+        matching = with_owner_check(
             owner, lambda owner: db.list_cards(owner=owner, state=state)
         )
+        if all_lists:
+            the_cards = matching
+        else:
+            the_cards = [t for t in matching if bool(t.later) == later]
         table = Table(box=SIMPLE, header_style="")
         table.add_column("ID")
         table.add_column("state")
         table.add_column("owner")
+        if all_lists:
+            table.add_column("list")
         table.add_column("summary")
         for t in the_cards:
             owner = "" if t.owner is None else t.owner
             summary = f"{t.summary} *" if t.details else t.summary
-            table.add_row(str(t.id), t.state, owner, summary)
+            card_list = ["later" if t.later else "sooner"] if all_lists else []
+            table.add_row(str(t.id), t.state, owner, *card_list, summary)
         out = StringIO()
         rich.print(table, file=out)
         print(out.getvalue())
         if any(t.details for t in the_cards):
             print("* has details: cards details ID\n")
+        parked = sum(1 for t in matching if t.later)
+        if not (later or all_lists) and parked:
+            print(f"{parked} more on the Later list: cards list --later\n")
 
 
 @app.command()
@@ -145,6 +164,26 @@ def finish(card_id: int):
             print(f"Error: Invalid card id {card_id}")
 
 
+@app.command("later")
+def later_cmd(card_id: int):
+    """Move a card to the Later list."""
+    with cards_db() as db:
+        try:
+            db.later(card_id)
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
+
+
+@app.command()
+def sooner(card_id: int):
+    """Move a card back to the Sooner list."""
+    with cards_db() as db:
+        try:
+            db.sooner(card_id)
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
+
+
 @app.command()
 def config():
     """List the path to the Cards db."""
@@ -165,7 +204,7 @@ def main(ctx: typer.Context):
     Cards is a small command line task tracking application.
     """
     if ctx.invoked_subcommand is None:
-        list_cards(owner=None, state=None)
+        list_cards(owner=None, state=None, later=False, all_lists=False)
 
 
 def get_path():

@@ -162,3 +162,42 @@ def test_details_edit_unchanged(cards_db, monkeypatch):
 
 def test_details_invalid_id(cards_db):
     assert cards_cli("details 99") == "Error: Invalid card id 99"
+
+
+def test_list_shows_sooner_with_later_note(cards_db):
+    cards_db.add_card(cards.Card("soon"))
+    cards_db.add_card(cards.Card("someday", later=True))
+    out = cards_cli("list")
+    assert "soon" in out and "someday" not in out
+    assert "1 more on the Later list: cards list --later" in out
+
+
+def test_list_later(cards_db):
+    cards_db.add_card(cards.Card("soon"))
+    cards_db.add_card(cards.Card("someday", later=True))
+    out = cards_cli("list --later")
+    assert "someday" in out and "soon\n" not in out and "more on the Later list" not in out
+
+
+def test_list_all_shows_list_column(cards_db):
+    cards_db.add_card(cards.Card("soon"))
+    cards_db.add_card(cards.Card("someday", later=True))
+    out = cards_cli("list --all")
+    assert "list" in out and "sooner" in out and "later" in out and "someday" in out
+
+
+def test_add_later(cards_db):
+    cards_cli("add parked --later")
+    assert cards_db.list_cards()[0].later is True
+
+
+def test_later_and_sooner(cards_db):
+    i = cards_db.add_card(cards.Card("foo"))
+    cards_cli(f"later {i}")
+    assert cards_db.get_card(i).later is True
+    cards_cli(f"sooner {i}")
+    assert cards_db.get_card(i).later is None
+
+
+def test_later_invalid_id(cards_db):
+    assert cards_cli("later 99") == "Error: Invalid card id 99"

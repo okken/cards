@@ -61,6 +61,7 @@ class FakeCardsAPI:
             "owner": {"id": 1, "email": owner, "name": MEMBERS[owner]} if owner else None,
             "state": card["state"],
             "details": card.get("details", ""),
+            "later": card.get("later", False),
         }
 
     def _filtered(self, params):
@@ -112,6 +113,7 @@ class FakeCardsAPI:
                 "owner": owner,
                 "state": body.get("state", "todo"),
                 "details": body.get("details", ""),
+                "later": body.get("later", False),
             }
             return 201, self._data(self.last_number)
         if path == "count/":

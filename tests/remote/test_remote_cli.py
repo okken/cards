@@ -122,3 +122,17 @@ def test_details_show_and_edit(remote_env, monkeypatch):
     code, out = run("list")
     assert "noted *" in out
     assert "some **markdown**" in run("details 1")[1]
+
+
+def test_later_and_sooner(remote_env):
+    run("add soon")
+    run("add someday --later")
+    assert remote_env.cards[2]["later"] is True
+    code, out = run("list")
+    assert "soon" in out and "someday" not in out
+    assert "1 more on the Later list" in out
+    run("later 1")
+    assert remote_env.cards[1]["later"] is True
+    run("sooner 2")
+    assert remote_env.cards[2]["later"] is False
+    assert "someday" in run("list")[1]

@@ -97,6 +97,7 @@ class RemoteCardsDB:
             owner=owner["name"] if owner else "",
             state=data["state"],
             details=data.get("details") or None,
+            later=data.get("later") or None,
             id=data["id"],
         )
 
@@ -111,6 +112,8 @@ class RemoteCardsDB:
             body["owner"] = card.owner
         if card.details:
             body["details"] = card.details
+        if card.later:
+            body["later"] = True
         status, payload = self._request("POST", body=body)
         self._check(status, payload, owner=card.owner)
         return payload["id"]
@@ -165,6 +168,14 @@ class RemoteCardsDB:
         """Set a card state to 'done'."""
         status, payload = self._request("POST", f"{card_id}/finish/")
         self._check(status, payload, card_id)
+
+    def later(self, card_id: int):
+        """Move a card to the Later list."""
+        self.update_card(card_id, Card(state=None, later=True))
+
+    def sooner(self, card_id: int):
+        """Move a card back to the Sooner list."""
+        self.update_card(card_id, Card(state=None, later=False))
 
     def delete_card(self, card_id: int) -> None:
         """Remove a card from db with given card_id."""
