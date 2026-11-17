@@ -55,17 +55,23 @@ Here's a demo of how it works:
 
       ID   state   owner   summary
      ───────────────────────────────────
+      2    todo    Brian   another task
+
+Done cards are hidden unless you ask for them:
+
+    $ cards list -s all
+
+      ID   state   owner   summary
+     ───────────────────────────────────
       1    done    Brian   a todo
       2    todo    Brian   another task
 
-
     $ cards block 2
-    $ cards details 2 --edit
+    $ cards details 2 --edit    # or add a card with details: cards add -d ...
     $ cards
 
       ID   state     owner   summary
      ─────────────────────────────────────────
-      1    done      Brian   a todo
       2    blocked   Brian   another task *
 
     * has details: cards details ID
@@ -76,11 +82,13 @@ Here's a demo of how it works:
     Waiting on a reply from Anna.
 
     $ cards delete 1
-    $ cards
+    $ cards list -s all
 
-      ID   state   owner   summary
-     ───────────────────────────────────
-      2    todo    Brian   another task
+      ID   state     owner   summary
+     ─────────────────────────────────────────
+      2    blocked   Brian   another task *
+
+    * has details: cards details ID
 
 Cards you're not getting to soon can be parked on the Later list.
 `cards` and `cards list` show the Sooner list, and mention how many cards are waiting:
@@ -88,9 +96,11 @@ Cards you're not getting to soon can be parked on the Later list.
     $ cards add rewrite the docs --later
     $ cards
 
-      ID   state   owner   summary
-     ───────────────────────────────────
-      2    todo    Brian   another task
+      ID   state     owner   summary
+     ─────────────────────────────────────────
+      2    blocked   Brian   another task *
+
+    * has details: cards details ID
 
     1 more on the Later list: cards list --later
 
@@ -121,8 +131,8 @@ Cards you're not getting to soon can be parked on the Later list.
     │ details   Show a card's details (or edit them with --edit).      │
     │ finish    Set a card state to 'done'.                            │
     │ later     Move a card to the Later list.                         │
-    │ list      List cards in db (the Sooner list, unless --later or   │
-    │           --all).                                                │
+    │ list      List open cards (use -s all to include done ones) on   │
+    │           the Sooner list (or --later, or --all).                │
     │ sooner    Move a card back to the Sooner list.                   │
     │ start     Set a card state to 'in prog'.                         │
     │ update    Modify a card in db with given id with new info.       │

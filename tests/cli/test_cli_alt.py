@@ -201,3 +201,34 @@ def test_later_and_sooner(cards_db):
 
 def test_later_invalid_id(cards_db):
     assert cards_cli("later 99") == "Error: Invalid card id 99"
+
+
+def test_list_hides_done_by_default(cards_db):
+    cards_db.add_card(cards.Card("open one"))
+    cards_db.add_card(cards.Card("finished one", state="done"))
+    for command in ("", "list", "list -s open"):
+        out = cards_cli(command)
+        assert "open one" in out and "finished one" not in out, command
+    out = cards_cli("list -s all")
+    assert "open one" in out and "finished one" in out
+    out = cards_cli("list -s done")
+    assert "open one" not in out and "finished one" in out
+
+
+def test_later_note_counts_open_cards_only(cards_db):
+    cards_db.add_card(cards.Card("parked", later=True))
+    cards_db.add_card(cards.Card("parked and done", state="done", later=True))
+    assert "1 more on the Later list" in cards_cli("list")
+
+
+def test_add_with_details(cards_db, monkeypatch):
+    monkeypatch.setattr("typer.edit", lambda text: "some notes\n")
+    cards_cli("add noted -d")
+    assert cards_db.list_cards()[0].details == "some notes"
+
+
+def test_add_with_details_editor_closed(cards_db, monkeypatch):
+    monkeypatch.setattr("typer.edit", lambda text: None)
+    cards_cli("add plain --details")
+    card = cards_db.list_cards()[0]
+    assert (card.summary, card.details) == ("plain", None)

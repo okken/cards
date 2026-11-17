@@ -27,14 +27,21 @@ def add(
     summary: List[str],
     owner: str = typer.Option(None, "-o", "--owner"),
     later: bool = typer.Option(False, "-l", "--later", help="Put the card on the Later list."),
+    with_details: bool = typer.Option(
+        False, "-d", "--details", help="Write the card's details in your $EDITOR."
+    ),
 ):
     """Add a card to db."""
     summary_str = " ".join(summary) if summary else None
+    details = None
+    if with_details:
+        # None if the editor is closed without saving; editors usually add a trailing newline
+        details = (typer.edit("") or "").rstrip("\n") or None
     with cards_db() as db:
         with_owner_check(
             owner,
             lambda owner: db.add_card(
-                cards.Card(summary_str, owner, state="todo", later=later or None)
+                cards.Card(summary_str, owner, state="todo", details=details, later=later or None)
             ),
         )
 
@@ -52,17 +59,25 @@ def delete(card_id: int):
 @app.command("list")
 def list_cards(
     owner: Optional[str] = typer.Option(None, "-o", "--owner"),
-    state: Optional[str] = typer.Option(None, "-s", "--state"),
+    state: str = typer.Option(
+        "open",
+        "-s",
+        "--state",
+        help="open (everything but done), all, todo, in prog, blocked or done.",
+    ),
     later: bool = typer.Option(False, "-l", "--later", help="Show the Later list."),
     all_lists: bool = typer.Option(False, "-a", "--all", help="Show both the Sooner and Later lists."),
 ):
     """
-    List cards in db (the Sooner list, unless --later or --all).
+    List open cards (use -s all to include done ones) on the Sooner list (or --later, or --all).
     """
     with cards_db() as db:
+        db_state = None if state in ("open", "all") else state
         matching = with_owner_check(
-            owner, lambda owner: db.list_cards(owner=owner, state=state)
+            owner, lambda owner: db.list_cards(owner=owner, state=db_state)
         )
+        if state == "open":
+            matching = [t for t in matching if t.state != "done"]
         if all_lists:
             the_cards = matching
         else:
@@ -204,7 +219,7 @@ def main(ctx: typer.Context):
     Cards is a small command line task tracking application.
     """
     if ctx.invoked_subcommand is None:
-        list_cards(owner=None, state=None, later=False, all_lists=False)
+        list_cards(owner=None, state="open", later=False, all_lists=False)
 
 
 def get_path():

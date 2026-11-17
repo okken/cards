@@ -136,3 +136,14 @@ def test_later_and_sooner(remote_env):
     run("sooner 2")
     assert remote_env.cards[2]["later"] is False
     assert "someday" in run("list")[1]
+
+
+def test_list_hides_done_and_add_details(remote_env, monkeypatch):
+    monkeypatch.setattr("typer.edit", lambda text: "notes\n")
+    run("add noted -d")
+    run("add finished")
+    run("finish 2")
+    assert remote_env.cards[1]["details"] == "notes"
+    out = run("list")[1]
+    assert "noted *" in out and "finished" not in out
+    assert "finished" in run("list -s all")[1]
