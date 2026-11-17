@@ -22,11 +22,15 @@ class Card:
     summary: str | None = None
     owner: str | None = None
     state: str | None = "todo"
+    details: str | None = None  # None means no details
     id: int | None = field(default=None, compare=False)
 
     @classmethod
     def from_dict(cls, d):
-        return Card(**d)
+        card = Card(**d)
+        if not card.details:
+            card.details = None  # cleared details are stored as ""
+        return card
 
     def to_dict(self):
         return asdict(self)
@@ -97,6 +101,10 @@ class CardsDB:
     def start(self, card_id: int):
         """Set a card state to 'in prog'."""
         self.update_card(card_id, Card(state="in prog"))
+
+    def block(self, card_id: int):
+        """Set a card state to 'blocked'."""
+        self.update_card(card_id, Card(state="blocked"))
 
     def finish(self, card_id: int):
         """Set a card state to 'done'."""

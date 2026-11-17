@@ -114,3 +114,51 @@ def test_missing_summary(cards_db):
     out, err = cards_cli_out_err("add")
     assert "Error" in err
     assert "Missing argument 'SUMMARY...'" in err
+
+
+def test_block(cards_db):
+    i = cards_db.add_card(cards.Card("some task"))
+    cards_cli(f"block {i}")
+    assert cards_db.get_card(i).state == "blocked"
+
+
+def test_list_marks_cards_with_details(cards_db):
+    cards_db.add_card(cards.Card("plain"))
+    cards_db.add_card(cards.Card("noted", details="more info"))
+    out = cards_cli("list")
+    assert "noted *" in out
+    assert "plain *" not in out
+    assert "* has details: cards details ID" in out
+
+
+def test_list_no_marker_note_without_details(cards_db):
+    cards_db.add_card(cards.Card("plain"))
+    assert "has details" not in cards_cli("list")
+
+
+def test_details_show(cards_db):
+    i = cards_db.add_card(cards.Card("noted", details="line 1\nline 2"))
+    assert cards_cli(f"details {i}") == f"{i}: noted\n\nline 1\nline 2"
+
+
+def test_details_show_empty(cards_db):
+    i = cards_db.add_card(cards.Card("plain"))
+    assert cards_cli(f"details {i}") == f"{i}: plain\n\n(no details)"
+
+
+def test_details_edit(cards_db, monkeypatch):
+    i = cards_db.add_card(cards.Card("noted", details="old"))
+    monkeypatch.setattr("typer.edit", lambda text: text.replace("old", "new") + "\n")
+    cards_cli(f"details {i} --edit")
+    assert cards_db.get_card(i).details == "new"
+
+
+def test_details_edit_unchanged(cards_db, monkeypatch):
+    i = cards_db.add_card(cards.Card("noted", details="old"))
+    monkeypatch.setattr("typer.edit", lambda text: None)
+    assert cards_cli(f"details {i} --edit") == "No changes."
+    assert cards_db.get_card(i).details == "old"
+
+
+def test_details_invalid_id(cards_db):
+    assert cards_cli("details 99") == "Error: Invalid card id 99"

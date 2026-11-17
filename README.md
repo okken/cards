@@ -59,6 +59,22 @@ Here's a demo of how it works:
       2    todo    Brian   another task
 
 
+    $ cards block 2
+    $ cards details 2 --edit
+    $ cards
+
+      ID   state     owner   summary
+     ─────────────────────────────────────────
+      1    done      Brian   a todo
+      2    blocked   Brian   another task *
+
+    * has details: cards details ID
+
+    $ cards details 2
+    2: another task
+
+    Waiting on a reply from Anna.
+
     $ cards delete 1
     $ cards
 
@@ -77,9 +93,11 @@ Here's a demo of how it works:
     ╰──────────────────────────────────────────────────────────────────╯
     ╭─ Commands ───────────────────────────────────────────────────────╮
     │ add       Add a card to db.                                      │
+    │ block     Set a card state to 'blocked'.                         │
     │ config    List the path to the Cards db.                         │
     │ count     Return number of cards in db.                          │
     │ delete    Remove card in db with given id.                       │
+    │ details   Show a card's details (or edit them with --edit).      │
     │ finish    Set a card state to 'done'.                            │
     │ list      List cards in db.                                      │
     │ start     Set a card state to 'in prog'.                         │

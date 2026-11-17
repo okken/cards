@@ -60,6 +60,7 @@ class FakeCardsAPI:
             "summary": card["summary"],
             "owner": {"id": 1, "email": owner, "name": MEMBERS[owner]} if owner else None,
             "state": card["state"],
+            "details": card.get("details", ""),
         }
 
     def _filtered(self, params):
@@ -110,6 +111,7 @@ class FakeCardsAPI:
                 "summary": body["summary"],
                 "owner": owner,
                 "state": body.get("state", "todo"),
+                "details": body.get("details", ""),
             }
             return 201, self._data(self.last_number)
         if path == "count/":
@@ -119,8 +121,8 @@ class FakeCardsAPI:
         number = int(number_str)
         if number not in self.cards:
             return 404, {"detail": "Not found."}
-        if action in ("start", "finish") and method == "POST":
-            self.cards[number]["state"] = "in prog" if action == "start" else "done"
+        if action in ("start", "block", "finish") and method == "POST":
+            self.cards[number]["state"] = {"start": "in prog", "block": "blocked", "finish": "done"}[action]
             return 200, self._data(number)
         if method == "GET":
             return 200, self._data(number)

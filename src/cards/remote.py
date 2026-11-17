@@ -96,6 +96,7 @@ class RemoteCardsDB:
             summary=data["summary"],
             owner=owner["name"] if owner else "",
             state=data["state"],
+            details=data.get("details") or None,
             id=data["id"],
         )
 
@@ -108,6 +109,8 @@ class RemoteCardsDB:
         body = {"summary": card.summary, "state": card.state or "todo"}
         if card.owner:
             body["owner"] = card.owner
+        if card.details:
+            body["details"] = card.details
         status, payload = self._request("POST", body=body)
         self._check(status, payload, owner=card.owner)
         return payload["id"]
@@ -151,6 +154,11 @@ class RemoteCardsDB:
     def start(self, card_id: int):
         """Set a card state to 'in prog'."""
         status, payload = self._request("POST", f"{card_id}/start/")
+        self._check(status, payload, card_id)
+
+    def block(self, card_id: int):
+        """Set a card state to 'blocked'."""
+        status, payload = self._request("POST", f"{card_id}/block/")
         self._check(status, payload, card_id)
 
     def finish(self, card_id: int):

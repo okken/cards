@@ -61,10 +61,13 @@ def list_cards(
         table.add_column("summary")
         for t in the_cards:
             owner = "" if t.owner is None else t.owner
-            table.add_row(str(t.id), t.state, owner, t.summary)
+            summary = f"{t.summary} *" if t.details else t.summary
+            table.add_row(str(t.id), t.state, owner, summary)
         out = StringIO()
         rich.print(table, file=out)
         print(out.getvalue())
+        if any(t.details for t in the_cards):
+            print("* has details: cards details ID\n")
 
 
 @app.command()
@@ -95,6 +98,41 @@ def start(card_id: int):
             db.start(card_id)
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
+
+
+@app.command()
+def block(card_id: int):
+    """Set a card state to 'blocked'."""
+    with cards_db() as db:
+        try:
+            db.block(card_id)
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
+
+
+@app.command()
+def details(
+    card_id: int,
+    edit: bool = typer.Option(False, "-e", "--edit", help="Edit the details in your $EDITOR."),
+):
+    """Show a card's details (or edit them with --edit)."""
+    with cards_db() as db:
+        try:
+            card = db.get_card(card_id)
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
+            return
+        if edit:
+            new_details = typer.edit(card.details or "")
+            if new_details is None:
+                print("No changes.")
+                return
+            # editors usually add a trailing newline
+            db.update_card(card_id, cards.Card(details=new_details.rstrip("\n"), state=None))
+            return
+        print(f"{card.id}: {card.summary}")
+        print()
+        print(card.details if card.details else "(no details)")
 
 
 @app.command()

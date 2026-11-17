@@ -105,3 +105,20 @@ def test_needs_team_and_key(remote_env, monkeypatch, missing):
     code, out = run("list")
     assert code == 1
     assert "CARDS_TEAM and CARDS_API_KEY" in out
+
+
+def test_block(remote_env):
+    run("add work")
+    run("block 1")
+    assert remote_env.cards[1]["state"] == "blocked"
+
+
+def test_details_show_and_edit(remote_env, monkeypatch):
+    run("add noted")
+    assert "(no details)" in run("details 1")[1]
+    monkeypatch.setattr("typer.edit", lambda text: "some **markdown**\n")
+    run("details 1 --edit")
+    assert remote_env.cards[1]["details"] == "some **markdown**"
+    code, out = run("list")
+    assert "noted *" in out
+    assert "some **markdown**" in run("details 1")[1]
