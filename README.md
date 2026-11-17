@@ -157,3 +157,23 @@ name. If an owner doesn't match anyone on the team, cards asks who you meant:
 
     $ cards add fix the docs -o brain
     'brain' isn't a team member. Did you mean Brian Okken (brian@pythontest.com)? [y/N]: y
+
+### Projects
+
+On the web app, a team can have several projects, each with its own Sooner and
+Later lists. Card numbers are unique across the team, so commands that act on one
+card, like `cards start 42`, work whatever project the card is in.
+
+Listing and adding use the team's default project, unless you pick one with
+`CARDS_PROJECT` or `-p` (which wins):
+
+    $ export CARDS_PROJECT=website     # e.g. per code repo, with direnv
+    $ cards                            # the website project's open cards
+    $ cards add -p docs fix the typos  # add to another project
+    $ cards list -p all                # every project, with a project column
+    $ cards update 42 -p docs          # move a card to another project
+    $ cards projects                   # the team's projects and open card counts
+    $ cards projects add docs          # add a project
+
+Projects are managed on the web app's Projects page too. They don't exist for
+local-file cards.

@@ -232,3 +232,14 @@ def test_add_with_details_editor_closed(cards_db, monkeypatch):
     cards_cli("add plain --details")
     card = cards_db.list_cards()[0]
     assert (card.summary, card.details) == ("plain", None)
+
+
+@pytest.mark.parametrize("command", ["list -p web", "add thing -p web", "projects", "projects add web"])
+def test_projects_need_the_web_app(cards_db, command):
+    assert cards_cli(command) == "Error: projects need the web app (set CARDS_URL)."
+
+
+def test_cards_project_env_is_ignored_locally(cards_db, monkeypatch):
+    monkeypatch.setenv("CARDS_PROJECT", "web")
+    cards_cli("add thing")
+    assert "thing" in cards_cli("list")

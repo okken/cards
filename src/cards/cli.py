@@ -26,6 +26,9 @@ def version():
 def add(
     summary: List[str],
     owner: str = typer.Option(None, "-o", "--owner"),
+    project: Optional[str] = typer.Option(
+        None, "-p", "--project", help="A project's name (web app only). Defaults to CARDS_PROJECT."
+    ),
     later: bool = typer.Option(False, "-l", "--later", help="Put the card on the Later list."),
     with_details: bool = typer.Option(
         False, "-d", "--details", help="Write the card's details in your $EDITOR."
@@ -37,7 +40,7 @@ def add(
     if with_details:
         # None if the editor is closed without saving; editors usually add a trailing newline
         details = (typer.edit("") or "").rstrip("\n") or None
-    with cards_db() as db:
+    with cards_db(project) as db:
         with_owner_check(
             owner,
             lambda owner: db.add_card(
@@ -67,11 +70,17 @@ def list_cards(
     ),
     later: bool = typer.Option(False, "-l", "--later", help="Show the Later list."),
     all_lists: bool = typer.Option(False, "-a", "--all", help="Show both the Sooner and Later lists."),
+    project: Optional[str] = typer.Option(
+        None,
+        "-p",
+        "--project",
+        help="A project's name, or all (web app only). Defaults to CARDS_PROJECT.",
+    ),
 ):
     """
     List open cards (use -s all to include done ones) on the Sooner list (or --later, or --all).
     """
-    with cards_db() as db:
+    with cards_db(project) as db:
         db_state = None if state in ("open", "all") else state
         matching = with_owner_check(
             owner, lambda owner: db.list_cards(owner=owner, state=db_state)
@@ -82,18 +91,26 @@ def list_cards(
             the_cards = matching
         else:
             the_cards = [t for t in matching if bool(t.later) == later]
+        listed_project = getattr(db, "listed_project", None)
+        all_projects = isinstance(db, RemoteCardsDB) and listed_project is None
+        if listed_project:
+            print(f"Project: {listed_project}")
         table = Table(box=SIMPLE, header_style="")
         table.add_column("ID")
         table.add_column("state")
         table.add_column("owner")
+        if all_projects:
+            table.add_column("project")
         if all_lists:
             table.add_column("list")
         table.add_column("summary")
         for t in the_cards:
             owner = "" if t.owner is None else t.owner
             summary = f"{t.summary} *" if t.details else t.summary
-            card_list = ["later" if t.later else "sooner"] if all_lists else []
-            table.add_row(str(t.id), t.state, owner, *card_list, summary)
+            extra = [t.project or ""] if all_projects else []
+            if all_lists:
+                extra.append("later" if t.later else "sooner")
+            table.add_row(str(t.id), t.state, owner, *extra, summary)
         out = StringIO()
         rich.print(table, file=out)
         print(out.getvalue())
@@ -109,15 +126,18 @@ def update(
     card_id: int,
     owner: str = typer.Option(None, "-o", "--owner"),
     summary: List[str] = typer.Option(None, "-s", "--summary"),
+    project: Optional[str] = typer.Option(
+        None, "-p", "--project", help="Move the card to this project (web app only)."
+    ),
 ):
     """Modify a card in db with given id with new info."""
     summary_str = " ".join(summary) if summary else None
-    with cards_db() as db:
+    with cards_db(project) as db:
         try:
             with_owner_check(
                 owner,
                 lambda owner: db.update_card(
-                    card_id, cards.Card(summary_str, owner, state=None)
+                    card_id, cards.Card(summary_str, owner, state=None, project=project)
                 ),
             )
         except cards.InvalidCardId:
@@ -199,6 +219,42 @@ def sooner(card_id: int):
             print(f"Error: Invalid card id {card_id}")
 
 
+projects_app = typer.Typer(help="List the team's projects, or add one (web app only).")
+app.add_typer(projects_app, name="projects")
+
+
+@projects_app.callback(invoke_without_command=True)
+def projects(ctx: typer.Context):
+    """List the team's projects (web app only)."""
+    if ctx.invoked_subcommand is not None:
+        return
+    with cards_db() as db:
+        require_web_app(db)
+        current = os.getenv("CARDS_PROJECT", "")
+        table = Table(box=SIMPLE, header_style="")
+        table.add_column("project")
+        table.add_column("open cards", justify="right")
+        table.add_column("")
+        for p in db.list_projects():
+            notes = []
+            if p["is_default"]:
+                notes.append("default")
+            if current and p["name"].lower() == current.lower():
+                notes.append("CARDS_PROJECT")
+            table.add_row(p["name"], str(p["open_cards"]), ", ".join(notes))
+        out = StringIO()
+        rich.print(table, file=out)
+        print(out.getvalue())
+
+
+@projects_app.command("add")
+def projects_add(name: List[str]):
+    """Add a project to the team."""
+    with cards_db() as db:
+        require_web_app(db)
+        db.add_project(" ".join(name))
+
+
 @app.command()
 def config():
     """List the path to the Cards db."""
@@ -219,7 +275,7 @@ def main(ctx: typer.Context):
     Cards is a small command line task tracking application.
     """
     if ctx.invoked_subcommand is None:
-        list_cards(owner=None, state="open", later=False, all_lists=False)
+        list_cards(owner=None, state="open", later=False, all_lists=False, project=None)
 
 
 def get_path():
@@ -231,22 +287,34 @@ def get_path():
     return db_path
 
 
-def open_db():
-    """The web app's API if CARDS_URL is set, otherwise the local database."""
+def open_db(project=None):
+    """The web app's API if CARDS_URL is set, otherwise the local database.
+
+    `project` (from -p) overrides CARDS_PROJECT; projects only exist in the web app.
+    """
     url = os.getenv("CARDS_URL", "")
     if not url:
+        if project:
+            print("Error: projects need the web app (set CARDS_URL).")
+            raise typer.Exit(1)
         return cards.CardsDB(get_path())
     team = os.getenv("CARDS_TEAM", "")
     api_key = os.getenv("CARDS_API_KEY", "")
     if not (team and api_key):
         print("Error: CARDS_URL is set, so CARDS_TEAM and CARDS_API_KEY are needed too.")
         raise typer.Exit(1)
-    return RemoteCardsDB(url, team, api_key)
+    return RemoteCardsDB(url, team, api_key, project=project or os.getenv("CARDS_PROJECT") or None)
+
+
+def require_web_app(db):
+    if not isinstance(db, RemoteCardsDB):
+        print("Error: projects need the web app (set CARDS_URL).")
+        raise typer.Exit(1)
 
 
 @contextmanager
-def cards_db():
-    db = open_db()
+def cards_db(project=None):
+    db = open_db(project)
     try:
         yield db
     except RemoteError as exc:

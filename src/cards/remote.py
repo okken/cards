@@ -37,17 +37,21 @@ class OwnerNotFound(CardsException):
 class RemoteCardsDB:
     """Same interface as CardsDB, backed by /a/<team>/api/cards/ on the Cards web app."""
 
-    def __init__(self, url: str, team: str, api_key: str):
+    def __init__(self, url: str, team: str, api_key: str, project: str | None = None):
+        """`project` is a project's name, "all", or None for the team's default project."""
         self._url = url.rstrip("/")
         self._team = team
         self._api_key = api_key
-        self._base = f"{self._url}/a/{urllib.parse.quote(team)}/api/cards/"
+        self._project = project or None
+        self._base = f"{self._url}/a/{urllib.parse.quote(team)}/api/"
+        # The project the last list_cards() showed, as named by the web app (None for "all").
+        self.listed_project: str | None = None
 
     # --- HTTP ---------------------------------------------------------------------
 
-    def _request(self, method: str, path: str = "", params=None, body=None):
-        """Send a request; return (status, parsed JSON body or None)."""
-        url = self._base + path
+    def _request(self, method: str, path: str = "", params=None, body=None, resource: str = "cards"):
+        """Send a request to /api/<resource>/<path>; return (status, parsed JSON body or None)."""
+        url = f"{self._base}{resource}/{path}"
         if params:
             url += "?" + urllib.parse.urlencode(params)
         data = json.dumps(body).encode() if body is not None else None
@@ -85,6 +89,10 @@ class RemoteCardsDB:
             )
         if status == 400 and isinstance(payload, dict) and "summary" in payload:
             raise MissingSummary
+        if status == 400 and isinstance(payload, dict) and "project" in payload:
+            raise RemoteError(_message(payload["project"]))
+        if status == 400 and isinstance(payload, dict) and "name" in payload:
+            raise RemoteError(_message(payload["name"]))
         raise RemoteError(f"Request failed ({status}): {payload}")
 
     # --- conversion ---------------------------------------------------------------
@@ -99,6 +107,7 @@ class RemoteCardsDB:
             details=data.get("details") or None,
             later=data.get("later") or None,
             id=data["id"],
+            project=data.get("project"),
         )
 
     # --- CardsDB interface ----------------------------------------------------------
@@ -114,6 +123,9 @@ class RemoteCardsDB:
             body["details"] = card.details
         if card.later:
             body["later"] = True
+        project = card.project or (self._project if self._project != "all" else None)
+        if project:
+            body["project"] = project
         status, payload = self._request("POST", body=body)
         self._check(status, payload, owner=card.owner)
         return payload["id"]
@@ -127,12 +139,15 @@ class RemoteCardsDB:
     def list_cards(self, owner=None, state=None):
         """Return a list of cards, following pagination."""
         params = {}
+        if self._project:
+            params["project"] = self._project
         if owner is not None:
             params["owner"] = owner
         if state is not None:
             params["state"] = state
         status, payload = self._request("GET", params=params)
         self._check(status, payload, owner=owner or "")
+        self.listed_project = payload.get("project")
         cards = [self._to_card(c) for c in payload["results"]]
         page = 1
         while payload.get("next"):
@@ -144,7 +159,8 @@ class RemoteCardsDB:
 
     def count(self) -> int:
         """Return the number of cards in db."""
-        status, payload = self._request("GET", "count/")
+        params = {"project": self._project} if self._project else None
+        status, payload = self._request("GET", "count/", params=params)
         self._check(status, payload)
         return payload["count"]
 
@@ -182,6 +198,16 @@ class RemoteCardsDB:
         status, payload = self._request("DELETE", f"{card_id}/")
         self._check(status, payload, card_id)
 
+    def list_projects(self) -> list[dict]:
+        """The team's projects (default first): dicts with name, is_default and open_cards."""
+        status, payload = self._request("GET", resource="projects")
+        self._check(status, payload)
+        return payload
+
+    def add_project(self, name: str) -> None:
+        status, payload = self._request("POST", body={"name": name}, resource="projects")
+        self._check(status, payload)
+
     def delete_all(self) -> None:
         """Not supported: too risky on a shared team."""
         raise RemoteError("delete_all isn't available for the web app.")
@@ -191,6 +217,11 @@ class RemoteCardsDB:
 
     def path(self):
         return f"{self._url} (team: {self._team})"
+
+
+def _message(errors) -> str:
+    """A DRF field error (a string or list of strings) as one message."""
+    return " ".join(errors) if isinstance(errors, list) else str(errors)
 
 
 def _parse(raw: bytes):

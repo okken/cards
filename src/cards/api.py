@@ -25,6 +25,8 @@ class Card:
     details: str | None = None  # None means no details
     later: bool | None = None  # True means parked on the Later list; None means on the Sooner list
     id: int | None = field(default=None, compare=False)
+    # The project's name (web app only); None means unchanged, or the default project for a new card
+    project: str | None = field(default=None, compare=False)
 
     @classmethod
     def from_dict(cls, d):

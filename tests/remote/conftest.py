@@ -25,6 +25,16 @@ class FakeCardsAPI:
         self.last_number = 0
         self.status_override = None
         self.requests = []
+        self.projects = ["General"]  # the first is the default
+
+    def _project(self, text):
+        """(project name, error) for a project name, "" for the default."""
+        if not text:
+            return self.projects[0], None
+        for name in self.projects:
+            if name.lower() == text.lower():
+                return name, None
+        return None, {"project": [f"No project named '{text}'. Projects: {', '.join(self.projects)}."]}
 
     # owner matching, roughly like the web app
     def _names(self, email):
@@ -62,10 +72,16 @@ class FakeCardsAPI:
             "state": card["state"],
             "details": card.get("details", ""),
             "later": card.get("later", False),
+            "project": card.get("project", "General"),
         }
 
     def _filtered(self, params):
         numbers = sorted(self.cards)
+        if params.get("project") != "all":
+            project, error = self._project(params.get("project", ""))
+            if error:
+                return None, error
+            numbers = [n for n in numbers if self.cards[n].get("project", "General") == project]
         owner = params.get("owner")
         if owner == "none":
             numbers = [n for n in numbers if self.cards[n]["owner"] is None]
@@ -81,11 +97,29 @@ class FakeCardsAPI:
             numbers = [n for n in numbers if self.cards[n]["state"] == state]
         return numbers, None
 
-    def request(self, method, path="", params=None, body=None):
+    def request(self, method, path="", params=None, body=None, resource="cards"):
         self.requests.append((method, path, params, body))
         if self.status_override:
             return self.status_override, {"detail": "nope"}
         params = params or {}
+        if resource == "projects":
+            if method == "POST":
+                if any(n.lower() == body["name"].lower() for n in self.projects):
+                    return 400, {"name": [f"There's already a project named '{body['name']}'."]}
+                self.projects.append(body["name"])
+                return 201, {"name": body["name"]}
+            return 200, [
+                {
+                    "name": name,
+                    "is_default": i == 0,
+                    "open_cards": sum(
+                        1
+                        for c in self.cards.values()
+                        if c.get("project", "General") == name and c["state"] != "done"
+                    ),
+                }
+                for i, name in enumerate(self.projects)
+            ]
         if path == "" and method == "GET":
             numbers, error = self._filtered(params)
             if error:
@@ -94,10 +128,14 @@ class FakeCardsAPI:
             start = (page - 1) * self.page_size
             chunk = numbers[start : start + self.page_size]
             has_next = start + self.page_size < len(numbers)
+            listed = None
+            if params.get("project") != "all":
+                listed = self._project(params.get("project", ""))[0]
             return 200, {
                 "count": len(numbers),
                 "next": "more" if has_next else None,
                 "results": [self._data(n) for n in chunk],
+                "project": listed,
             }
         if path == "" and method == "POST":
             if not body.get("summary"):
@@ -107,8 +145,12 @@ class FakeCardsAPI:
                 owner, error = self._resolve(body["owner"])
                 if error:
                     return 400, error
+            project, error = self._project(body.get("project", ""))
+            if error:
+                return 400, error
             self.last_number += 1
             self.cards[self.last_number] = {
+                "project": project,
                 "summary": body["summary"],
                 "owner": owner,
                 "state": body.get("state", "todo"),
@@ -134,6 +176,11 @@ class FakeCardsAPI:
                 if error:
                     return 400, error
                 body = {**body, "owner": owner}
+            if "project" in body:
+                project, error = self._project(body["project"])
+                if error:
+                    return 400, error
+                body = {**body, "project": project}
             self.cards[number].update(body)
             return 200, self._data(number)
         if method == "DELETE":
@@ -147,8 +194,8 @@ def fake_api(monkeypatch):
     """Route every RemoteCardsDB request to an in-memory FakeCardsAPI."""
     api = FakeCardsAPI()
 
-    def fake_request(self, method, path="", params=None, body=None):
-        return api.request(method, path, params, body)
+    def fake_request(self, method, path="", params=None, body=None, resource="cards"):
+        return api.request(method, path, params, body, resource)
 
     monkeypatch.setattr(RemoteCardsDB, "_request", fake_request)
     return api
