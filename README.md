@@ -82,6 +82,7 @@ Done cards are hidden unless you ask for them:
     Waiting on a reply from Anna.
 
     $ cards delete 1
+    Delete card 1: a todo? [y/N]: y
     $ cards list -s all
 
       ID   state     owner   summary
@@ -127,7 +128,7 @@ Cards you're not getting to soon can be parked on the Later list.
     │ block     Set a card state to 'blocked'.                         │
     │ config    List the path to the Cards db.                         │
     │ count     Return number of cards in db.                          │
-    │ delete    Remove card in db with given id.                       │
+    │ delete    Remove card in db with given id (asks first).          │
     │ details   Show a card's details (or edit them with --edit).      │
     │ finish    Set a card state to 'done'.                            │
     │ later     Move a card to the Later list.                         │

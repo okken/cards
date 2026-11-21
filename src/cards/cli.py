@@ -50,10 +50,17 @@ def add(
 
 
 @app.command()
-def delete(card_id: int):
-    """Remove card in db with given id."""
+def delete(
+    card_id: int,
+    yes: bool = typer.Option(False, "-y", "--yes", help="Delete without asking first."),
+):
+    """Remove card in db with given id (asks first)."""
     with cards_db() as db:
         try:
+            card = db.get_card(card_id)
+            if not yes and not typer.confirm(f"Delete card {card_id}: {card.summary}?"):
+                print("Not deleted.")
+                return
             db.delete_card(card_id)
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")

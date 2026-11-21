@@ -1,7 +1,9 @@
 import cards
 import pytest
 
-from .cards_cli_helper import cards_cli, cards_cli_out_err
+from cards.cli import app
+
+from .cards_cli_helper import cards_cli, cards_cli_out_err, runner
 
 
 @pytest.fixture(autouse=True)
@@ -61,9 +63,26 @@ def test_add_with_owner(cards_db):
     assert all_cards[0] == expected
 
 
-def test_delete(cards_db):
+def test_delete_asks_first(cards_db):
     i = cards_db.add_card(cards.Card("foo"))
-    cards_cli(f"delete {i}")
+    result = runner.invoke(app, ["delete", str(i)], input="y\n")
+    assert f"Delete card {i}: foo? [y/N]" in result.stdout
+    assert cards_db.count() == 0
+
+
+@pytest.mark.parametrize("answer", ["n\n", "\n"])
+def test_delete_keeps_card_unless_yes(cards_db, answer):
+    i = cards_db.add_card(cards.Card("foo"))
+    result = runner.invoke(app, ["delete", str(i)], input=answer)
+    assert "Not deleted." in result.stdout
+    assert cards_db.count() == 1
+
+
+@pytest.mark.parametrize("flag", ["-y", "--yes"])
+def test_delete_yes_skips_question(cards_db, flag):
+    i = cards_db.add_card(cards.Card("foo"))
+    out = cards_cli(f"delete {i} {flag}")
+    assert "?" not in out
     assert cards_db.count() == 0
 
 

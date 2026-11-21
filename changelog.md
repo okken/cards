@@ -57,6 +57,11 @@ TEMPLATE_END
 - In web app mode, an owner that doesn't match a team member gets a
   "Did you mean ...?" prompt, using the web app's suggestions.
 
+### Changed
+
+- `cards delete N` shows the card and asks before deleting it. Use `-y` / `--yes`
+  to skip the question.
+
 ## [2.0.2] - 24-Oct-2026
 
 ### Developer Experience
