@@ -11,9 +11,22 @@ Specifically, testing with the pytest test framework.
 
 The project appears in:
 - [The Complete pytest Course](https://courses.pythontest.com/)
-  - uses cards version 2.0.0
+  - uses cards version 2.0.0: `pip install cards==2.0.0`
 - [Python Testing with pytest, 2nd edition](https://pythontest.com/pytest-book/)
-  - uses cards version 1.0.1 - approximately
+  - uses cards version 1.0.1 - approximately: `pip install cards==1.0.1`
+
+Version 3 adds features for using cards as a real task tracker, including the
+[Cards web app](https://cards.pythontest.com). If you're following the course or the
+book, install the version above, so the code and output match.
+
+Installing
+----------
+
+    pip install cards
+
+or, to keep it in its own environment:
+
+    uv tool install cards
 
 Can be used as a simple todo list
 ---------------------------------
@@ -134,6 +147,7 @@ Cards you're not getting to soon can be parked on the Later list.
     │ later     Move a card to the Later list.                         │
     │ list      List open cards (use -s all to include done ones) on   │
     │           the Sooner list (or --later, or --all).                │
+    │ projects  List the team's projects, or add one (web app only).   │
     │ sooner    Move a card back to the Sooner list.                   │
     │ start     Set a card state to 'in prog'.                         │
     │ update    Modify a card in db with given id with new info.       │
@@ -148,7 +162,7 @@ By default, cards are stored in a local file (`~/cards_db`, or `CARDS_DB_DIR`).
 
 To use a team's cards on the Cards web app instead, set:
 
-    export CARDS_URL=https://<cards web app address>
+    export CARDS_URL=https://cards.pythontest.com
     export CARDS_TEAM=<team slug, as in /a/<team slug>/ in web app URLs>
     export CARDS_API_KEY=<an API key from your profile page in the web app>
 
