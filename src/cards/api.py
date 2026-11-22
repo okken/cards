@@ -22,11 +22,20 @@ class Card:
     summary: str | None = None
     owner: str | None = None
     state: str | None = "todo"
+    details: str | None = None  # None means no details
+    later: bool | None = None  # True means parked on the Later list; None means on the Sooner list
     id: int | None = field(default=None, compare=False)
+    # The project's name (web app only); None means unchanged, or the default project for a new card
+    project: str | None = field(default=None, compare=False)
 
     @classmethod
     def from_dict(cls, d):
-        return Card(**d)
+        card = Card(**d)
+        if not card.details:
+            card.details = None  # cleared details are stored as ""
+        if not card.later:
+            card.later = None  # moved back to Sooner is stored as False
+        return card
 
     def to_dict(self):
         return asdict(self)
@@ -98,9 +107,21 @@ class CardsDB:
         """Set a card state to 'in prog'."""
         self.update_card(card_id, Card(state="in prog"))
 
+    def block(self, card_id: int):
+        """Set a card state to 'blocked'."""
+        self.update_card(card_id, Card(state="blocked"))
+
     def finish(self, card_id: int):
         """Set a card state to 'done'."""
         self.update_card(card_id, Card(state="done"))
+
+    def later(self, card_id: int):
+        """Move a card to the Later list."""
+        self.update_card(card_id, Card(state=None, later=True))
+
+    def sooner(self, card_id: int):
+        """Move a card back to the Sooner list."""
+        self.update_card(card_id, Card(state=None, later=False))
 
     def delete_card(self, card_id: int) -> None:
         """Remove a card from db with given card_id."""
