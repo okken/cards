@@ -47,6 +47,14 @@ TEMPLATE_END
 
 -->
 
+## [3.0.1] - 22-Nov-2026
+
+### Developer Experience
+
+- README and package summary describe cards as a task tracker first, with the web app; the pytest course and
+  book versions move to a "Learning pytest with cards" section.
+- Link to the web app's command line setup guide.
+
 ## [3.0.0] - 22-Nov-2026
 
 ### Highlights

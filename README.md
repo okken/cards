@@ -1,23 +1,11 @@
 cards
 =====
 
-Project task tracking / todo list
+A small task tracker for the command line: what's next, who's on it, and what's done.
 
-A Teaching Project
-----------------------------
-
-This project is used for teaching the concepts of software testing.
-Specifically, testing with the pytest test framework.
-
-The project appears in:
-- [The Complete pytest Course](https://courses.pythontest.com/)
-  - uses cards version 2.0.0: `pip install cards==2.0.0`
-- [Python Testing with pytest, 2nd edition](https://pythontest.com/pytest-book/)
-  - uses cards version 1.0.1 - approximately: `pip install cards==1.0.1`
-
-Version 3 adds features for using cards as a real task tracker, including the
-[Cards web app](https://cards.pythontest.com). If you're following the course or the
-book, install the version above, so the code and output match.
+Use it on its own, with your cards in a file on your computer, or with the
+[Cards web app](https://cards.pythontest.com), so your team shares one list from the
+terminal and the browser.
 
 Installing
 ----------
@@ -28,40 +16,30 @@ or, to keep it in its own environment:
 
     uv tool install cards
 
-Can be used as a simple todo list
----------------------------------
-
-Even though the primary goal of the project is for teaching about software testing, I also use it as a simple command line task tracker for myself and my team.
+It needs Python 3.10 or newer.
 
 Usage
 -----
 
-Here's a demo of how it works:
+Here's a quick tour:
 
     $ cards add a todo
     $ cards add -o Brian another task
     $ cards list
 
-    ID   state   owner   summary
-    ───────────────────────────────────
-    1    todo            a todo
-    2    todo    Brian   another task
+      ID   state   owner   summary
+     ───────────────────────────────────
+      1    todo            a todo
+      2    todo    Brian   another task
 
     $ cards update 1 -o Brian
- .  $ cards
-                                     
-    ID   state   owner   summary       
-    ─────────────────────────────────── 
-      1    todo    Brian   a todo        
-      2    todo    Brian   another task  
-                                      
     $ cards start 1
     $ cards
-                                       
-      ID   state     owner   summary       
-     ───────────────────────────────────── 
-      1    in prog   Brian   a todo        
-      2    todo      Brian   another task 
+
+      ID   state     owner   summary
+     ─────────────────────────────────────
+      1    in prog   Brian   a todo
+      2    todo      Brian   another task
 
     $ cards finish 1
     $ cards
@@ -160,7 +138,8 @@ Using the Cards web app
 
 By default, cards are stored in a local file (`~/cards_db`, or `CARDS_DB_DIR`).
 
-To use a team's cards on the Cards web app instead, set:
+To use a team's cards on the Cards web app instead, set these. There's a step by step
+[setup guide](https://cards.pythontest.com/guide/cli/) on the web app.
 
     export CARDS_URL=https://cards.pythontest.com
     export CARDS_TEAM=<team slug, as in /a/<team slug>/ in web app URLs>
@@ -192,3 +171,16 @@ Listing and adding use the team's default project, unless you pick one with
 
 Projects are managed on the web app's Projects page too. They don't exist for
 local-file cards.
+
+Learning pytest with cards
+--------------------------
+
+cards started as a teaching project, and it's still the example application in:
+
+- [The Complete pytest Course](https://courses.pythontest.com/), which uses cards 2.0.0:
+  `pip install cards==2.0.0`
+- [Python Testing with pytest, 2nd edition](https://pythontest.com/pytest-book/), which uses
+  cards 1.0.1 (approximately): `pip install cards==1.0.1`
+
+If you're following the course or the book, install the version it uses, so the code and
+output match. Version 3 added the web app, projects, the Later list and more.
