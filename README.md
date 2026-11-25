@@ -57,13 +57,13 @@ Done cards are hidden unless you ask for them:
       1    done    Brian   a todo
       2    todo    Brian   another task
 
-    $ cards block 2
+    $ cards pause 2
     $ cards details 2 --edit    # or add a card with details: cards add -d ...
     $ cards
 
       ID   state     owner   summary
      ─────────────────────────────────────────
-      2    blocked   Brian   another task *
+      2    paused    Brian   another task *
 
     * has details: cards details ID
 
@@ -78,7 +78,7 @@ Done cards are hidden unless you ask for them:
 
       ID   state     owner   summary
      ─────────────────────────────────────────
-      2    blocked   Brian   another task *
+      2    paused    Brian   another task *
 
     * has details: cards details ID
 
@@ -90,7 +90,7 @@ Cards you're not getting to soon can be parked on the Later list.
 
       ID   state     owner   summary
      ─────────────────────────────────────────
-      2    blocked   Brian   another task *
+      2    paused    Brian   another task *
 
     * has details: cards details ID
 
@@ -105,6 +105,12 @@ Cards you're not getting to soon can be parked on the Later list.
     $ cards sooner 3      # move it back; `cards later ID` parks a card
     $ cards list --all    # both lists, with a "list" column
 
+Cards can be high, normal (the default) or low priority. High cards are listed first and low ones
+last, with a "priority" column when any card isn't normal:
+
+    $ cards add fix the login page -P high
+    $ cards update 3 --priority low
+
     $ cards --help
 
      Usage: cards [OPTIONS] COMMAND [ARGS]...
@@ -116,7 +122,7 @@ Cards you're not getting to soon can be parked on the Later list.
     ╰──────────────────────────────────────────────────────────────────╯
     ╭─ Commands ───────────────────────────────────────────────────────╮
     │ add       Add a card to db.                                      │
-    │ block     Set a card state to 'blocked'.                         │
+    │ comment   Add a comment to a card (web app only).                │
     │ config    List the path to the Cards db.                         │
     │ count     Return number of cards in db.                          │
     │ delete    Remove card in db with given id (asks first).          │
@@ -125,6 +131,7 @@ Cards you're not getting to soon can be parked on the Later list.
     │ later     Move a card to the Later list.                         │
     │ list      List open cards (use -s all to include done ones) on   │
     │           the Sooner list (or --later, or --all).                │
+    │ pause     Set a card state to 'paused'.                          │
     │ projects  List the team's projects, or add one (web app only).   │
     │ sooner    Move a card back to the Sooner list.                   │
     │ start     Set a card state to 'in prog'.                         │
@@ -151,6 +158,13 @@ name. If an owner doesn't match anyone on the team, cards asks who you meant:
 
     $ cards add fix the docs -o brain
     'brain' isn't a team member. Did you mean Brian Okken? [y/N]: y
+
+### Comments
+
+With the web app, cards can have comments, shown on the card's page and by `cards details`:
+
+    $ cards comment 42 waiting on the new logo
+    $ cards details 42
 
 ### Projects
 

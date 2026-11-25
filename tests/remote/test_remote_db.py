@@ -118,3 +118,23 @@ def test_later_round_trip(remote_db):
     assert remote_db.get_card(i).later is True
     remote_db.sooner(i)
     assert remote_db.get_card(i).later is None
+
+
+def test_priority_round_trip(remote_db):
+    i = remote_db.add_card(Card("urgent", priority="high"))
+    assert remote_db.get_card(i).priority == "high"
+    remote_db.update_card(i, Card(state=None, priority="normal"))
+    assert remote_db.get_card(i).priority is None
+
+
+def test_list_sorted_by_priority(remote_db):
+    remote_db.add_card(Card("low", priority="low"))
+    remote_db.add_card(Card("normal"))
+    remote_db.add_card(Card("high", priority="high"))
+    assert [c.summary for c in remote_db.list_cards()] == ["high", "normal", "low"]
+
+
+def test_bad_priority_error(remote_db):
+    i = remote_db.add_card(Card("x"))
+    with pytest.raises(RemoteError, match="not a valid choice"):
+        remote_db.update_card(i, Card(state=None, priority="urgent"))

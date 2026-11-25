@@ -4,7 +4,7 @@ The CLI uses the web app when CARDS_URL is set.
 import shlex
 
 import pytest
-from cards.cli import app
+from cards.cli import app, local_time
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -107,10 +107,10 @@ def test_needs_team_and_key(remote_env, monkeypatch, missing):
     assert "CARDS_TEAM and CARDS_API_KEY" in out
 
 
-def test_block(remote_env):
+def test_pause(remote_env):
     run("add work")
-    run("block 1")
-    assert remote_env.cards[1]["state"] == "blocked"
+    run("pause 1")
+    assert remote_env.cards[1]["state"] == "paused"
 
 
 def test_details_show_and_edit(remote_env, monkeypatch):
@@ -165,3 +165,33 @@ def test_add_and_update_unknown_project(remote_env):
     run("add something")
     code, out = run("update 1 -p nope")
     assert code == 1 and "No project named 'nope'" in out
+
+
+def test_comment_and_details_show_comments(remote_env):
+    run("add work")
+    run("comment 1 first thought")
+    run('comment 1 "second\nwith two lines"')
+    code, out = run("details 1")
+    assert code == 0
+    assert "Comments:" in out
+    assert f"  Brian Okken, {local_time('2026-11-25T17:03:12.123456Z')}:" in out
+    assert "    first thought" in out
+    assert "    second\n    with two lines" in out
+
+
+def test_details_without_comments(remote_env):
+    run("add work")
+    code, out = run("details 1")
+    assert "Comments:" not in out
+
+
+def test_comment_invalid_id(remote_env):
+    code, out = run("comment 9 hi")
+    assert out.strip() == "Error: Invalid card id 9"
+
+
+def test_blank_comment(remote_env):
+    run("add work")
+    code, out = run('comment 1 " "')
+    assert code == 1
+    assert "A comment needs some text." in out

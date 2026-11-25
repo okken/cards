@@ -18,7 +18,7 @@ def test_add_later(cards_db):
     assert cards_db.get_card(i).later is True
 
 
-@pytest.mark.parametrize("state", ("todo", "in prog", "blocked", "done"))
+@pytest.mark.parametrize("state", ("todo", "in prog", "paused", "done"))
 def test_later_and_sooner_keep_state(cards_db, state):
     i = cards_db.add_card(Card("foo", owner="Brian", state=state, details="notes"))
     cards_db.later(i)

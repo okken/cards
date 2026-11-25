@@ -1,7 +1,7 @@
 import cards
 import pytest
 
-from cards.cli import app
+from cards.cli import app, local_time
 
 from .cards_cli_helper import cards_cli, cards_cli_out_err, runner
 
@@ -126,6 +126,7 @@ def test_main(cards_db):
         "delete 25",
         "start 25",
         "finish 25",
+        "pause 25",
         "block 25",
         "sooner 25",
         "update 25 -s foo -o brian",
@@ -142,10 +143,23 @@ def test_missing_summary(cards_db):
     assert "Missing argument 'SUMMARY...'" in err
 
 
-def test_block(cards_db):
+@pytest.mark.parametrize("command", ["pause", "block"])
+def test_pause(cards_db, command):
     i = cards_db.add_card(cards.Card("some task"))
-    cards_cli(f"block {i}")
-    assert cards_db.get_card(i).state == "blocked"
+    cards_cli(f"{command} {i}")
+    assert cards_db.get_card(i).state == "paused"
+
+
+def test_old_blocked_cards_read_as_paused(cards_db):
+    i = cards_db.add_card(cards.Card("stuck", state="blocked"))
+    assert cards_db.get_card(i).state == "paused"
+    assert cards_db.list_cards(state="paused")[0].id == i
+    assert "paused" in cards_cli("list -s blocked")
+
+
+def test_help_hides_block(cards_db):
+    out = cards_cli("--help")
+    assert "pause" in out and "block" not in out
 
 
 def test_list_marks_cards_with_details(cards_db):
@@ -269,3 +283,56 @@ def test_cards_project_env_is_ignored_locally(cards_db, monkeypatch):
     monkeypatch.setenv("CARDS_PROJECT", "web")
     cards_cli("add thing")
     assert "thing" in cards_cli("list")
+
+
+def test_add_and_update_priority(cards_db):
+    cards_cli("add urgent -P high")
+    assert cards_db.list_cards()[0].priority == "high"
+    cards_cli("update 1 --priority normal")
+    assert cards_db.get_card(1).priority is None
+    cards_cli("update 1 -P low")
+    assert cards_db.get_card(1).priority == "low"
+
+
+def test_add_normal_priority_stores_none(cards_db):
+    cards_cli("add plain -P normal")
+    assert cards_db.get_card(1).priority is None
+
+
+def test_bad_priority_is_rejected(cards_db):
+    out, err = cards_cli_out_err("add urgent -P urgent")
+    assert "urgent" in out + err
+    assert cards_db.count() == 0
+
+
+def test_list_sorts_by_priority_with_column(cards_db):
+    cards_db.add_card(cards.Card("low one", priority="low"))
+    cards_db.add_card(cards.Card("normal one"))
+    cards_db.add_card(cards.Card("high one", priority="high"))
+    out = cards_cli("list")
+    assert "priority" in out
+    lines = [line for line in out.splitlines() if " one" in line]
+    assert [line.split()[0] for line in lines] == ["3", "2", "1"]
+    assert "high" in lines[0] and "low" in lines[2]
+
+
+def test_list_hides_priority_column_when_all_normal(cards_db):
+    cards_db.add_card(cards.Card("normal one"))
+    assert "priority" not in cards_cli("list")
+
+
+def test_comment_needs_web_app(cards_db):
+    i = cards_db.add_card(cards.Card("some task"))
+    assert cards_cli(f"comment {i} hi") == "Error: comments need the web app (set CARDS_URL)."
+
+
+def test_local_time(monkeypatch):
+    import time
+
+    monkeypatch.setenv("TZ", "America/Los_Angeles")
+    time.tzset()
+    try:
+        assert local_time("2026-11-25T17:03:12.123456Z") == "2026-11-25 09:03"
+    finally:
+        monkeypatch.undo()
+        time.tzset()

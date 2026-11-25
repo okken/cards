@@ -6,6 +6,8 @@ import rich
 from rich.table import Table
 from rich.box import SIMPLE
 from contextlib import contextmanager
+from datetime import datetime
+from enum import Enum
 from typing import List, Optional
 
 import cards
@@ -14,6 +16,15 @@ from cards.remote import OwnerNotFound, RemoteCardsDB, RemoteError
 import typer
 
 app = typer.Typer(add_completion=False)
+
+
+class Priority(str, Enum):
+    high = "high"
+    normal = "normal"
+    low = "low"
+
+
+PRIORITY_HELP = "high, normal or low. High cards are listed first, low ones last."
 
 
 @app.command()
@@ -30,6 +41,7 @@ def add(
         None, "-p", "--project", help="A project's name (web app only). Defaults to CARDS_PROJECT."
     ),
     later: bool = typer.Option(False, "-l", "--later", help="Put the card on the Later list."),
+    priority: Optional[Priority] = typer.Option(None, "-P", "--priority", help=PRIORITY_HELP),
     with_details: bool = typer.Option(
         False, "-d", "--details", help="Write the card's details in your $EDITOR."
     ),
@@ -44,7 +56,14 @@ def add(
         with_owner_check(
             owner,
             lambda owner: db.add_card(
-                cards.Card(summary_str, owner, state="todo", details=details, later=later or None)
+                cards.Card(
+                    summary_str,
+                    owner,
+                    state="todo",
+                    details=details,
+                    later=later or None,
+                    priority=priority.value if priority and priority != Priority.normal else None,
+                )
             ),
         )
 
@@ -73,7 +92,7 @@ def list_cards(
         "open",
         "-s",
         "--state",
-        help="open (everything but done), all, todo, in prog, blocked or done.",
+        help="open (everything but done), all, todo, in prog, paused or done.",
     ),
     later: bool = typer.Option(False, "-l", "--later", help="Show the Later list."),
     all_lists: bool = typer.Option(False, "-a", "--all", help="Show both the Sooner and Later lists."),
@@ -98,6 +117,8 @@ def list_cards(
             the_cards = matching
         else:
             the_cards = [t for t in matching if bool(t.later) == later]
+        the_cards = sorted(the_cards, key=cards.Card.sort_key)
+        show_priority = any(t.priority for t in the_cards)
         listed_project = getattr(db, "listed_project", None)
         all_projects = isinstance(db, RemoteCardsDB) and listed_project is None
         if listed_project:
@@ -105,6 +126,8 @@ def list_cards(
         table = Table(box=SIMPLE, header_style="")
         table.add_column("ID")
         table.add_column("state")
+        if show_priority:
+            table.add_column("priority")
         table.add_column("owner")
         if all_projects:
             table.add_column("project")
@@ -117,7 +140,8 @@ def list_cards(
             extra = [t.project or ""] if all_projects else []
             if all_lists:
                 extra.append("later" if t.later else "sooner")
-            table.add_row(str(t.id), t.state, owner, *extra, summary)
+            priority = [t.priority or ""] if show_priority else []
+            table.add_row(str(t.id), t.state, *priority, owner, *extra, summary)
         out = StringIO()
         rich.print(table, file=out)
         print(out.getvalue())
@@ -136,6 +160,7 @@ def update(
     project: Optional[str] = typer.Option(
         None, "-p", "--project", help="Move the card to this project (web app only)."
     ),
+    priority: Optional[Priority] = typer.Option(None, "-P", "--priority", help=PRIORITY_HELP),
 ):
     """Modify a card in db with given id with new info."""
     summary_str = " ".join(summary) if summary else None
@@ -144,7 +169,14 @@ def update(
             with_owner_check(
                 owner,
                 lambda owner: db.update_card(
-                    card_id, cards.Card(summary_str, owner, state=None, project=project)
+                    card_id,
+                    cards.Card(
+                        summary_str,
+                        owner,
+                        state=None,
+                        project=project,
+                        priority=priority.value if priority else None,
+                    ),
                 ),
             )
         except cards.InvalidCardId:
@@ -162,13 +194,17 @@ def start(card_id: int):
 
 
 @app.command()
-def block(card_id: int):
-    """Set a card state to 'blocked'."""
+def pause(card_id: int):
+    """Set a card state to 'paused'."""
     with cards_db() as db:
         try:
-            db.block(card_id)
+            db.pause(card_id)
         except cards.InvalidCardId:
             print(f"Error: Invalid card id {card_id}")
+
+
+# The old name for pause, before 3.1. Hidden, so it doesn't clutter --help.
+app.command("block", hidden=True)(pause)
 
 
 @app.command()
@@ -194,6 +230,27 @@ def details(
         print(f"{card.id}: {card.summary}")
         print()
         print(card.details if card.details else "(no details)")
+        comments = db.list_comments(card_id) if isinstance(db, RemoteCardsDB) else []
+        if comments:
+            print()
+            print("Comments:")
+            for c in comments:
+                author = c["author"]["name"] if c.get("author") else "Someone"
+                print()
+                print(f"  {author}, {local_time(c['created_at'])}:")
+                for line in c["text"].splitlines():
+                    print(f"    {line}")
+
+
+@app.command()
+def comment(card_id: int, text: List[str]):
+    """Add a comment to a card (web app only)."""
+    with cards_db() as db:
+        require_web_app(db, "comments")
+        try:
+            db.add_comment(card_id, " ".join(text))
+        except cards.InvalidCardId:
+            print(f"Error: Invalid card id {card_id}")
 
 
 @app.command()
@@ -313,9 +370,15 @@ def open_db(project=None):
     return RemoteCardsDB(url, team, api_key, project=project or os.getenv("CARDS_PROJECT") or None)
 
 
-def require_web_app(db):
+def local_time(iso: str) -> str:
+    """An API timestamp (UTC) as local time, to the minute."""
+    # Python 3.10's fromisoformat doesn't accept the "Z" (UTC) suffix the API uses.
+    return datetime.fromisoformat(iso.replace("Z", "+00:00")).astimezone().strftime("%Y-%m-%d %H:%M")
+
+
+def require_web_app(db, feature="projects"):
     if not isinstance(db, RemoteCardsDB):
-        print("Error: projects need the web app (set CARDS_URL).")
+        print(f"Error: {feature} need the web app (set CARDS_URL).")
         raise typer.Exit(1)
 
 

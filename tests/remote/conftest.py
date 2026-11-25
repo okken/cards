@@ -72,11 +72,13 @@ class FakeCardsAPI:
             "state": card["state"],
             "details": card.get("details", ""),
             "later": card.get("later", False),
+            "priority": card.get("priority", "normal"),
             "project": card.get("project", "General"),
         }
 
     def _filtered(self, params):
-        numbers = sorted(self.cards)
+        ranks = {"high": 0, "normal": 1, "low": 2}
+        numbers = sorted(self.cards, key=lambda n: (ranks[self.cards[n].get("priority", "normal")], n))
         if params.get("project") != "all":
             project, error = self._project(params.get("project", ""))
             if error:
@@ -154,8 +156,26 @@ class FakeCardsAPI:
                 "state": body.get("state", "todo"),
                 "details": body.get("details", ""),
                 "later": body.get("later", False),
+                "priority": body.get("priority", "normal"),
             }
             return 201, self._data(self.last_number)
+        if path.endswith("/comments/"):
+            number = int(path.split("/")[0])
+            if number not in self.cards:
+                return 404, {"detail": "Not found."}
+            comments = self.cards[number].setdefault("comments", [])
+            if method == "GET":
+                return 200, comments
+            if not body.get("text", "").strip():
+                return 400, {"text": ["A comment needs some text."]}
+            comment = {
+                "id": len(comments) + 1,
+                "text": body["text"],
+                "author": {"id": 1, "email": "brian@example.com", "name": "Brian Okken"},
+                "created_at": "2026-11-25T17:03:12.123456Z",
+            }
+            comments.append(comment)
+            return 201, comment
         if path == "count/":
             return 200, {"count": len(self.cards)}
 
@@ -163,8 +183,8 @@ class FakeCardsAPI:
         number = int(number_str)
         if number not in self.cards:
             return 404, {"detail": "Not found."}
-        if action in ("start", "block", "finish") and method == "POST":
-            self.cards[number]["state"] = {"start": "in prog", "block": "blocked", "finish": "done"}[action]
+        if action in ("start", "pause", "finish") and method == "POST":
+            self.cards[number]["state"] = {"start": "in prog", "pause": "paused", "finish": "done"}[action]
             return 200, self._data(number)
         if method == "GET":
             return 200, self._data(number)
@@ -174,6 +194,8 @@ class FakeCardsAPI:
                 if error:
                     return 400, error
                 body = {**body, "owner": owner}
+            if body.get("priority", "normal") not in ("high", "normal", "low"):
+                return 400, {"priority": [f"\"{body['priority']}\" is not a valid choice."]}
             if "project" in body:
                 project, error = self._project(body["project"])
                 if error:

@@ -7,12 +7,14 @@ import threading
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
 import pytest
+import cards
 from cards import MissingSummary
 from cards.remote import RemoteCardsDB, RemoteError, _parse
 
 
 class Handler(BaseHTTPRequestHandler):
     seen = []
+    user_agents = []
 
     def _reply(self, status, payload):
         body = json.dumps(payload).encode()
@@ -24,6 +26,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         self.seen.append(("GET", self.path, self.headers["Authorization"], None))
+        self.user_agents.append(self.headers["User-Agent"])
         self._reply(200, {"count": 7})
 
     def do_POST(self):
@@ -39,6 +42,7 @@ class Handler(BaseHTTPRequestHandler):
 @pytest.fixture
 def server():
     Handler.seen = []
+    Handler.user_agents = []
     httpd = HTTPServer(("127.0.0.1", 0), Handler)
     thread = threading.Thread(target=httpd.serve_forever, daemon=True)
     thread.start()
@@ -93,3 +97,8 @@ def test_check_errors(status, payload, error, match):
 def test_parse_empty_and_non_json():
     assert _parse(b"") is None
     assert _parse(b"<html>Bad Gateway</html>") == "<html>Bad Gateway</html>"
+
+
+def test_user_agent_names_the_cli_version(server):
+    RemoteCardsDB(server, "sox", "secret-key").count()
+    assert Handler.user_agents == [f"cards/{cards.__version__}"]

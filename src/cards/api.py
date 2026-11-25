@@ -10,11 +10,18 @@ from .db import DB
 
 __all__ = [
     "Card",
+    "PRIORITIES",
     "CardsDB",
     "CardsException",
     "MissingSummary",
     "InvalidCardId",
 ]
+
+
+# In sort order: high cards are listed first, low ones last.
+PRIORITIES = ("high", "normal", "low")
+# "paused" was called "blocked" before 3.1; local databases may still have it.
+OLD_STATES = {"blocked": "paused"}
 
 
 @dataclass
@@ -24,6 +31,7 @@ class Card:
     state: str | None = "todo"
     details: str | None = None  # None means no details
     later: bool | None = None  # True means parked on the Later list; None means on the Sooner list
+    priority: str | None = None  # "high" or "low"; None means normal
     id: int | None = field(default=None, compare=False)
     # The project's name (web app only); None means unchanged, or the default project for a new card
     project: str | None = field(default=None, compare=False)
@@ -35,10 +43,17 @@ class Card:
             card.details = None  # cleared details are stored as ""
         if not card.later:
             card.later = None  # moved back to Sooner is stored as False
+        card.state = OLD_STATES.get(card.state, card.state)
+        if card.priority == "normal":
+            card.priority = None  # set back to normal is stored as "normal"
         return card
 
     def to_dict(self):
         return asdict(self)
+
+    def sort_key(self):
+        """Highest priority first, then by id."""
+        return PRIORITIES.index(self.priority or "normal"), self.id or 0
 
 
 class CardsException(Exception):
@@ -78,19 +93,12 @@ class CardsDB:
 
     def list_cards(self, owner=None, state=None):
         """Return a list of cards."""
-        all_cards = self._db.read_all()
-        if (owner is not None) and (state is not None):
-            return [
-                Card.from_dict(t)
-                for t in all_cards
-                if (t["owner"] == owner and t["state"] == state)
-            ]
-        elif owner is not None:
-            return [Card.from_dict(t) for t in all_cards if t["owner"] == owner]
-        elif state is not None:
-            return [Card.from_dict(t) for t in all_cards if t["state"] == state]
-        else:
-            return [Card.from_dict(t) for t in all_cards]
+        state = OLD_STATES.get(state, state)
+        return [
+            card
+            for card in (Card.from_dict(t) for t in self._db.read_all())
+            if (owner is None or card.owner == owner) and (state is None or card.state == state)
+        ]
 
     def count(self) -> int:
         """Return the number of cards in db."""
@@ -107,9 +115,9 @@ class CardsDB:
         """Set a card state to 'in prog'."""
         self.update_card(card_id, Card(state="in prog"))
 
-    def block(self, card_id: int):
-        """Set a card state to 'blocked'."""
-        self.update_card(card_id, Card(state="blocked"))
+    def pause(self, card_id: int):
+        """Set a card state to 'paused'."""
+        self.update_card(card_id, Card(state="paused"))
 
     def finish(self, card_id: int):
         """Set a card state to 'done'."""

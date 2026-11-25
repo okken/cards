@@ -47,6 +47,28 @@ TEMPLATE_END
 
 -->
 
+## [3.1.0] - 25-Nov-2026
+
+### Highlights
+
+- Card priority, comments, and "paused" instead of "blocked". Everything from 3.0 keeps working.
+
+### Added
+
+- Priority: cards can be high, normal (the default) or low. Set it with `-P` / `--priority` on
+  `add` and `update`. Lists show high cards first and low ones last, with a "priority" column
+  when any listed card isn't normal. Works with the local database and the web app.
+- Comments (web app mode only): `cards comment N text` adds one, and `cards details N` lists a
+  card's comments under its details.
+- In web app mode, requests send a `cards/<version>` User-Agent, so the web app can tell which
+  CLI versions are in use (and, one day, ask very old ones to upgrade).
+
+### Changed
+
+- The "blocked" state is now "paused", a less negative word. `cards block N` is now `cards pause N`.
+  `cards block` and `-s blocked` still work, and existing "blocked" cards in a local database read
+  as "paused".
+
 ## [3.0.1] - 22-Nov-2026
 
 ### Developer Experience

@@ -8,6 +8,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from . import __version__
 from .api import Card, CardsException, InvalidCardId, MissingSummary
 
 __all__ = [
@@ -15,6 +16,9 @@ __all__ = [
     "RemoteError",
     "OwnerNotFound",
 ]
+
+
+USER_AGENT = f"cards/{__version__}"
 
 
 class RemoteError(CardsException):
@@ -58,6 +62,8 @@ class RemoteCardsDB:
         request = urllib.request.Request(url, data=data, method=method)
         request.add_header("Authorization", f"Api-Key {self._api_key}")
         request.add_header("Accept", "application/json")
+        # Lets the web app see which CLI versions are in use, and later turn away ones too old to work.
+        request.add_header("User-Agent", USER_AGENT)
         if data is not None:
             request.add_header("Content-Type", "application/json")
         try:
@@ -92,6 +98,10 @@ class RemoteCardsDB:
             raise MissingSummary
         if status == 400 and isinstance(payload, dict) and "project" in payload:
             raise RemoteError(_message(payload["project"]))
+        if status == 400 and isinstance(payload, dict) and "text" in payload:
+            raise RemoteError(_message(payload["text"]))
+        if status == 400 and isinstance(payload, dict) and "priority" in payload:
+            raise RemoteError(_message(payload["priority"]))
         if status == 400 and isinstance(payload, dict) and "name" in payload:
             raise RemoteError(_message(payload["name"]))
         raise RemoteError(f"Request failed ({status}): {payload}")
@@ -107,6 +117,7 @@ class RemoteCardsDB:
             state=data["state"],
             details=data.get("details") or None,
             later=data.get("later") or None,
+            priority=None if data.get("priority", "normal") == "normal" else data["priority"],
             id=data["id"],
             project=data.get("project"),
         )
@@ -124,6 +135,8 @@ class RemoteCardsDB:
             body["details"] = card.details
         if card.later:
             body["later"] = True
+        if card.priority:
+            body["priority"] = card.priority
         project = card.project or (self._project if self._project != "all" else None)
         if project:
             body["project"] = project
@@ -176,9 +189,9 @@ class RemoteCardsDB:
         status, payload = self._request("POST", f"{card_id}/start/")
         self._check(status, payload, card_id)
 
-    def block(self, card_id: int):
-        """Set a card state to 'blocked'."""
-        status, payload = self._request("POST", f"{card_id}/block/")
+    def pause(self, card_id: int):
+        """Set a card state to 'paused'."""
+        status, payload = self._request("POST", f"{card_id}/pause/")
         self._check(status, payload, card_id)
 
     def finish(self, card_id: int):
@@ -198,6 +211,17 @@ class RemoteCardsDB:
         """Remove a card from db with given card_id."""
         status, payload = self._request("DELETE", f"{card_id}/")
         self._check(status, payload, card_id)
+
+    def add_comment(self, card_id: int, text: str) -> None:
+        status, payload = self._request("POST", f"{card_id}/comments/", body={"text": text})
+        self._check(status, payload, card_id)
+
+    def list_comments(self, card_id: int) -> list[dict]:
+        """A card's comments, oldest first: dicts with text, author (a dict with name and email, or None) and
+        created_at."""
+        status, payload = self._request("GET", f"{card_id}/comments/")
+        self._check(status, payload, card_id)
+        return payload
 
     def list_projects(self) -> list[dict]:
         """The team's projects (default first): dicts with name, is_default and open_cards."""
